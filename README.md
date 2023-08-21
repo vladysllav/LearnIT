@@ -43,7 +43,7 @@ Here's how to get the project up and running on your local machine for developme
 5. Run the application:
 
     ```
-    poetry run uvicorn app.main:app --reload
+    poetry run uvicorn main:app --reload
     ```
 
 Your application should now be running at `http://localhost:8000`.
