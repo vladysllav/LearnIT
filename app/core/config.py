@@ -1,12 +1,17 @@
+import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
+from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    # SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = os.getenv('SECRET_KEY')
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     SERVER_NAME: str = 'learnit'
@@ -34,9 +39,9 @@ class Settings(BaseSettings):
         return v
 
     POSTGRES_SERVER: str = 'localhost:5432'
-    POSTGRES_USER: str = 'postgres'
-    POSTGRES_PASSWORD: str = 'password'
-    POSTGRES_DB: str = 'learnit'
+    POSTGRES_USER: str = os.getenv('POSTGRES_USER')
+    POSTGRES_PASSWORD: str = os.getenv('POSTGRES_PASSWORD')
+    POSTGRES_DB: str = os.getenv('POSTGRES_DB')
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -55,6 +60,7 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr = "admin@example.com"
     FIRST_SUPERUSER_PASSWORD: str = "password"
     USERS_OPEN_REGISTRATION: bool = False
+    EMAILS_ENABLED: bool = False
 
     class Config:
         case_sensitive = True
