@@ -38,7 +38,8 @@ class Settings(BaseSettings):
             return None
         return v
 
-    POSTGRES_SERVER: str = 'localhost:5432'
+    # POSTGRES_SERVER: str = 'localhost:5432'
+    POSTGRES_SERVER: str = f'{os.getenv("POSTGRES_HOST")}:{os.getenv("POSTGRES_PORT")}'
     POSTGRES_USER: str = os.getenv('POSTGRES_USER')
     POSTGRES_PASSWORD: str = os.getenv('POSTGRES_PASSWORD')
     POSTGRES_DB: str = os.getenv('POSTGRES_DB')
