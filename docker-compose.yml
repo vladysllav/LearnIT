@@ -4,8 +4,7 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      SQLALCHEMY_DATABASE_URL: ${SQLALCHEMY_DATABASE_URL}
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8000"
     depends_on:
       - db
 
