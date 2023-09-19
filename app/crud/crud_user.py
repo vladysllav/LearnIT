@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
-from app.models.user import User
+from app.models.user import User, UserType
 from app.schemas.user import UserCreate, UserUpdate
 
 
@@ -16,8 +16,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
-            full_name=obj_in.full_name,
-            is_superuser=obj_in.is_superuser,
+            first_name=obj_in.first_name,
+            last_name=obj_in.last_name,
+            type=obj_in.type,
+            date_of_birth=obj_in.date_of_birth,
+            phone_number=obj_in.phone_number,
         )
         db.add(db_obj)
         db.commit()
@@ -49,7 +52,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user.is_active
 
     def is_superuser(self, user: User) -> bool:
-        return user.is_superuser
+        return user.type == UserType.superadmin
 
 
 user = CRUDUser(User)
