@@ -1,13 +1,13 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import Any, List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.api import deps
+from app.core import security
 from app.core.config import settings
 from app.utils import send_new_account_email
 
@@ -38,7 +38,7 @@ def create_user(
         *,
         db: Session = Depends(deps.get_db),
         user_in: schemas.UserCreate,
-        # current_user: models.User = Depends(deps.get_current_active_superuser),
+        current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create new user.
@@ -55,6 +55,41 @@ def create_user(
             email_to=user_in.email, username=user_in.email, password=user_in.password
         )
     return user
+
+
+@router.post("/sign_up", response_model=schemas.Token)
+def sign_up(
+        *,
+        db: Session = Depends(deps.get_db),
+        user_in: schemas.UserSignUp,
+) -> Any:
+    """
+    Sign Up as a new student.
+    """
+    user = crud.user.get_by_email(db, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=409,
+            detail="The user with this email already exists in the system.",
+        )
+    user = crud.user.create(db, obj_in=user_in)
+    if settings.EMAILS_ENABLED and user_in.email:
+        send_new_account_email(
+            email_to=user_in.email, username=user_in.email, password=user_in.password
+        )
+
+    # return user
+    user_auth = crud.user.authenticate(
+        db, email=user_in.email, password=user_in.password
+    )
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(
+            user_auth.id, user_auth.email, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
 
 
 @router.put("/me", response_model=schemas.User)

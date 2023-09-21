@@ -13,12 +13,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.email == email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
+        user_type = getattr(obj_in, 'type', UserType.student)
+
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             first_name=obj_in.first_name,
             last_name=obj_in.last_name,
-            type=obj_in.type,
+            type=user_type,
             date_of_birth=obj_in.date_of_birth,
             phone_number=obj_in.phone_number,
         )
