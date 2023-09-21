@@ -35,7 +35,6 @@ class UserLogin(BaseModel):
 class UserUpdate(UserBase):
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
-    password: Optional[str] = Field(None, example="newsecurepassword")
 
 
 class UserInDBBase(UserBase):

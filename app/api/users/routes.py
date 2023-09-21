@@ -50,14 +50,11 @@ def create_user(
             detail="The user with this username already exists in the system.",
         )
     user = crud.user.create(db, obj_in=user_in)
-    if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
+
     return user
 
 
-@router.post("/sign_up", response_model=schemas.Token)
+@router.post("/sign-up", response_model=schemas.Token)
 def sign_up(
         *,
         db: Session = Depends(deps.get_db),
@@ -73,20 +70,11 @@ def sign_up(
             detail="The user with this email already exists in the system.",
         )
     user = crud.user.create(db, obj_in=user_in)
-    if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
-
-    # return user
-    user_auth = crud.user.authenticate(
-        db, email=user_in.email, password=user_in.password
-    )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(
-            user_auth.id, user_auth.email, expires_delta=access_token_expires
+            user.id, user.email, expires_delta=access_token_expires
         ),
         "token_type": "bearer",
     }
