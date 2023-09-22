@@ -9,19 +9,20 @@ from app.models.user import UserType
 # Shared properties
 class UserBase(BaseModel):
     email: Optional[EmailStr] = Field(None, example="john.doe@example.com")
-    is_active: Optional[bool] = Field(True, example=True)
     first_name: Optional[str] = Field(None, example="John")
     last_name: Optional[str] = Field(None, example="Doe")
-    type: Optional[UserType] = UserType.student
     date_of_birth: Optional[date] = Field(None, example="2000-01-01")
     phone_number: Optional[str] = Field(None, example="+380123456789")
 
-    class Config:
-        use_enum_values = True
+
+class UserSignUp(UserBase):
+    password: str = Field(..., example="securepassword")
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
+    is_active: Optional[bool] = Field(True, example=True)
+    type: Optional[UserType] = UserType.student
     password: str = Field(..., example="securepassword")
 
 
@@ -32,10 +33,13 @@ class UserLogin(BaseModel):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: Optional[str] = Field(None, example="newsecurepassword")
+    is_active: Optional[bool] = Field(True, example=True)
+    type: Optional[UserType] = UserType.student
 
 
 class UserInDBBase(UserBase):
+    is_active: Optional[bool] = Field(True, example=True)
+    type: Optional[UserType] = UserType.student
     id: Optional[int] = None
 
     class Config:
