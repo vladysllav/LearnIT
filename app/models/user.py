@@ -25,13 +25,5 @@ class User(Base):
     date_of_birth = Column(Date, nullable=True)
     phone_number = Column(String, nullable=True)
     items = relationship("Item", back_populates="owner")
-
-
-# class User(Base):
-#     id = Column(Integer, primary_key=True, index=True)
-#     full_name = Column(String, index=True)
-#     email = Column(String, unique=True, index=True, nullable=False)
-#     hashed_password = Column(String, nullable=False)
-#     is_active = Column(Boolean(), default=True)
-#     is_superuser = Column(Boolean(), default=False)
-#     items = relationship("Item", back_populates="owner")
+    courses = relationship("Course", back_populates="lecturer")
+    user_courses = relationship("UserCourse", back_populates="user")
