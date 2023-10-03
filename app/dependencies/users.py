@@ -1,31 +1,22 @@
-from typing import Generator
-
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
-from app.core import security
 from app.core.config import settings
+from app import crud, models, schemas
 from app.core.security import decode_access_token
-from app.db.session import SessionLocal
 from app.api.auth_bearer import JWTBearer
+from app.dependencies.base import get_db
+
 
 # reusable_oauth2 = OAuth2PasswordBearer(
-#     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+#     tokenUrl=f"{settings.API_STR}/login/access-token"
 # )
 
+
 jwt_bearer = JWTBearer()
-
-
-def get_db() -> Generator:
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
 
 def get_current_user(
