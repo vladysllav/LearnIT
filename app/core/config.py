@@ -9,7 +9,7 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
+    API_STR: str = "/api"
     # SECRET_KEY: str = secrets.token_urlsafe(32)
     SECRET_KEY: str = os.getenv('SECRET_KEY')
     # 60 minutes * 24 hours * 8 days = 8 days
