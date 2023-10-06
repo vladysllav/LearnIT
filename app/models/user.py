@@ -1,13 +1,9 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, Date
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from datetime import datetime
 from enum import Enum as PyEnum
 
-if TYPE_CHECKING:
-    from .item import Item  # noqa: F401
 
 
 class UserType(PyEnum):
