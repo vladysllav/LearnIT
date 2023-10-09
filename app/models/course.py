@@ -1,8 +1,13 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
-from .user import User
+
+
+user_course_association = Table('user_course_association', Base.metadata,
+    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('course_id', Integer, ForeignKey('course.id'))
+)
 
 
 class Course(Base):
@@ -13,6 +18,6 @@ class Course(Base):
     rating = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    lecturer_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    lecturer = relationship(User, back_populates='courses')
-    user_courses = relationship("UserCourse", back_populates="course")
+    created_by_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    created_by = relationship("User", back_populates='created_courses')
+    users = relationship("User", secondary=user_course_association, back_populates="users")

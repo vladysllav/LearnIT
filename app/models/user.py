@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, Date
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
+from app.models.course import user_course_association
 from datetime import datetime
 from enum import Enum as PyEnum
 
@@ -25,5 +26,5 @@ class User(Base):
     date_of_birth = Column(Date, nullable=True)
     phone_number = Column(String, nullable=True)
     items = relationship("Item", back_populates="owner")
-    courses = relationship("Course", back_populates="lecturer")
-    user_courses = relationship("UserCourse", back_populates="user")
+    created_courses = relationship("Course", back_populates="created_by")
+    user_courses = relationship("Course", secondary=user_course_association, back_populates="users")
