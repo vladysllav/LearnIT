@@ -19,7 +19,6 @@ class UserSignUp(UserBase):
     password: str = Field(..., example="securepassword")
 
 
-# Properties to receive via API on creation
 class UserCreate(UserBase):
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
@@ -27,30 +26,19 @@ class UserCreate(UserBase):
 
 
 class UserLogin(BaseModel):
-    username: EmailStr
+    email: EmailStr
     password: str
 
 
-# Properties to receive via API on update
 class UserUpdate(UserBase):
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
 
 
-class UserInDBBase(UserBase):
+class User(UserBase):
+    id: Optional[int] = None
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
-    id: Optional[int] = None
 
     class Config:
         orm_mode = True
-
-
-# Additional properties to return via API
-class User(UserInDBBase):
-    pass
-
-
-# Additional properties stored in DB
-class UserInDB(UserInDBBase):
-    hashed_password: str

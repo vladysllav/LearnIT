@@ -36,7 +36,6 @@ class JWTBearer(HTTPBearer):
         """
         try:
             payload = decode_access_token(jwt_token)
-            return bool(payload)  # Return True if payload is not None, otherwise False
+            return bool(payload)
         except Exception as e:
-            # Log the error if needed
             return False

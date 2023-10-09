@@ -23,21 +23,15 @@ def create_access_token(
     to_encode = {"exp": expire, "sub": str(user_id), "email": str(user_email)}
     secret_key = settings.SECRET_KEY
     algorithm = ALGORITHM
-    # print(f'Encode secret key = {secret_key}')
-    # print(f'Encode algorithm = {algorithm}')
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=algorithm)
     return encoded_jwt
 
 
 def decode_access_token(token: str) -> dict:
-    # print(f'Incoming token for decoding: {token}')
     try:
         secret_key = settings.SECRET_KEY
         algorithm = ALGORITHM
-        # print(f'Decode secret key = {secret_key}')
-        # print(f'Decode algorithm = {algorithm}')
         decoded_token = jwt.decode(token, secret_key, algorithms=[algorithm])
-        # print(f'decoded_token: {decoded_token}')
         exp_datetime = datetime.fromtimestamp(decoded_token["exp"], timezone.utc)
 
         return decoded_token if exp_datetime >= datetime.now(timezone.utc) else None
