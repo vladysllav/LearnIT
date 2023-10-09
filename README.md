@@ -2,9 +2,38 @@
 
 This is a Learning Management System (LMS) developed using FastAPI and SQLAlchemy. It provides a platform for course creators to create and manage programming courses, and for students to learn from these courses.
 
+## Installation and Usage with Docker
+
+Here's how to get the project up and running using docker and docker compose
+
+### Prerequisites
+
+- Docker and docker-compose
+
+### Setup
+
+1. Clone this repository:
+
+    ```
+    git clone git@github.com:vladysllav/LearnIT.git
+    ```
+   
+2. Copy .env file and fill environment variables
+   ```
+   cp .env.example .env
+   ```
+3. Build docker images:
+   ```
+   docker compose build
+   ```
+4. Run docker images
+   ```
+   docker compose up
+   ```
+Your application should now be running at `http://localhost:8000`
 ## Installation and Usage
 
-Here's how to get the project up and running on your local machine for development and testing.
+Here's how to get the project up and running on your local machine for development and testing. First of all you need to install libraries from prerequisites.
 
 ### Prerequisites
 
@@ -17,7 +46,7 @@ Here's how to get the project up and running on your local machine for developme
 1. Clone this repository:
 
     ```
-    git clone https://github.com/your-username/myapp.git
+    git clone git@github.com:vladysllav/LearnIT.git
     ```
 
 2. Navigate to the project directory:
@@ -32,24 +61,21 @@ Here's how to get the project up and running on your local machine for developme
     poetry install
     ```
 
-4. Start the PostgreSQL database. If PostgreSQL is installed on your machine, you can usually start it with a command like:
+4. Then you need to setup your database and set environment variable in .env file with needed data:
 
     ```
-    pg_ctl start
+    cp .env.example .env
     ```
 
-    Make sure to update the `SQLALCHEMY_DATABASE_URL` in `app/core/database.py` with your actual database connection details.
-
-5. Run the application:
+    Make sure to **update all environment variables**.
+5. Run alembic migrations:
+   ```
+   alembic upgrade head
+   ```
+6. Run the application:
 
     ```
-    poetry run uvicorn main:app --reload
+    python -m app.main
     ```
 
 Your application should now be running at `http://localhost:8000`.
-
-## Testing
-
-To run the tests for the application, navigate to the project directory in the terminal and run the following command:
-
-    poetry run pytest

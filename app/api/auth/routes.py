@@ -19,7 +19,7 @@ from app.utils import (
 router = APIRouter()
 
 
-@router.post("/login/access-token", response_model=schemas.Token)
+@router.post("/login", response_model=schemas.Token)
 def login_access_token(
     db: Session = Depends(get_db), user_data: schemas.UserLogin = Body(...)
 ) -> Any:
@@ -27,7 +27,7 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
     user = crud.user.authenticate(
-        db, email=user_data.username, password=user_data.password
+        db, email=user_data.email, password=user_data.password
     )
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
@@ -42,10 +42,10 @@ def login_access_token(
     }
 
 
-@router.post("/login/test-token", response_model=schemas.User)
-def test_token(current_user: models.User = Depends(get_current_user)) -> Any:
+@router.post("/me", response_model=schemas.User)
+def me(current_user: models.User = Depends(get_current_user)) -> Any:
     """
-    Test access token
+    Endpoint that return user info from jwt token
     """
     return current_user
 
@@ -94,3 +94,29 @@ def reset_password(
     db.add(user)
     db.commit()
     return {"msg": "Password updated successfully"}
+
+
+@router.post("/sign-up", response_model=schemas.Token)
+def sign_up(
+        *,
+        db: Session = Depends(get_db),
+        user_in: schemas.UserSignUp,
+) -> Any:
+    """
+    Sign Up as a new student.
+    """
+    user = crud.user.get_by_email(db, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=409,
+            detail="The user with this email already exists in the system.",
+        )
+    user = crud.user.create(db, obj_in=user_in)
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(
+            user.id, user.email, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
