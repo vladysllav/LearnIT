@@ -25,6 +25,5 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     date_of_birth = Column(Date, nullable=True)
     phone_number = Column(String, nullable=True)
-    items = relationship("Item", back_populates="owner")
     created_courses = relationship("Course", back_populates="created_by")
     user_courses = relationship("Course", secondary=user_course_association, back_populates="users")

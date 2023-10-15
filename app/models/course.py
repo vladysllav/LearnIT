@@ -20,4 +20,4 @@ class Course(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     created_by = relationship("User", back_populates='created_courses')
-    users = relationship("User", secondary=user_course_association, back_populates="users")
+    users = relationship("User", secondary=user_course_association, back_populates="user_courses")
