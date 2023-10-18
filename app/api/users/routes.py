@@ -1,12 +1,12 @@
 from datetime import date, timedelta
 from typing import Any, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
-from app.dependencies.base import get_db
+from app.dependencies.base import get_db, get_pagination_params
 from app.dependencies.users import get_current_active_user, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
@@ -21,15 +21,23 @@ def alive():
 
 @router.get("/", response_model=List[schemas.User])
 def read_users(
+        response: Response,
         db: Session = Depends(get_db),
-        skip: int = 0,
-        limit: int = 100,
+        pagination: dict = Depends(get_pagination_params),
         current_user: models.User = Depends(get_current_active_superuser),
 ) -> Any:
     """
-    Retrieve users.
+    Retrieve paginated users response
     """
+    skip = pagination["skip"]
+    limit = pagination["limit"]
     users = crud.user.get_multi(db, skip=skip, limit=limit)
+    total = crud.user.get_total_count(db)
+
+    response.headers["X-Total-Count"] = str(total)
+    response.headers["X-Offset"] = str(skip)
+    response.headers["X-Limit"] = str(limit)
+
     return users
 
 
@@ -52,32 +60,6 @@ def create_user(
     user = crud.user.create(db, obj_in=user_in)
 
     return user
-
-
-@router.post("/sign-up", response_model=schemas.Token)
-def sign_up(
-        *,
-        db: Session = Depends(get_db),
-        user_in: schemas.UserSignUp,
-) -> Any:
-    """
-    Sign Up as a new student.
-    """
-    user = crud.user.get_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=409,
-            detail="The user with this email already exists in the system.",
-        )
-    user = crud.user.create(db, obj_in=user_in)
-
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return {
-        "access_token": security.create_access_token(
-            user.id, user.email, expires_delta=access_token_expires
-        ),
-        "token_type": "bearer",
-    }
 
 
 @router.put("/me", response_model=schemas.User)
