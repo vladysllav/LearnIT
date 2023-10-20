@@ -1,4 +1,5 @@
 from typing import Union, Dict, Any
+from datetime import datetime
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -18,6 +19,7 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
         
         course_data = obj_in.dict()
         course_data['created_by_id'] = current_user.id
+        course_data['created_at'] = datetime.utcnow()
         
         db_obj = Course(**course_data)
         db.add(db_obj)

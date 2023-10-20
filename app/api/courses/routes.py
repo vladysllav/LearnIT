@@ -11,13 +11,13 @@ from app.dependencies.users import get_current_user
 router = APIRouter()
 
 
-@router.post('/')
+@router.get('/')
 def read_courses(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-    courses = crud_course.get_multi(db, skip=skip, limit=limit)
+    courses = crud_course.get_list(db, skip=skip, limit=limit)
     return courses
 
 
-@router.post('/create')
+@router.post('/')
 def create_course(*, db: Session = Depends(get_db), course_in: CourseCreate,
                   current_user: User = Depends(get_current_user)):
     course = crud_course.create(db, obj_in=course_in, current_user=current_user)
@@ -25,10 +25,10 @@ def create_course(*, db: Session = Depends(get_db), course_in: CourseCreate,
     return course
 
 
-@router.post('/update/{course_id}')
-def update_course(*, db: Session = Depends(get_db), course_id: int,
+@router.put('/{id}')
+def update_course(*, db: Session = Depends(get_db), id: int,
                   course_in: CourseUpdate, current_user: User = Depends(get_current_user)):
-    course = crud_course.get(db, id=course_id)
+    course = crud_course.get(db, id=id)
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
    

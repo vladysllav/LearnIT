@@ -12,6 +12,7 @@ class BaseCourse(BaseModel):
 
 
 class CourseRead(BaseCourse):
+    id: Optional[int] = Field(None, example=1)
     rating: Optional[float] = Field(None, example=4.7)
     created_at: Optional[datetime] = Field(None, example='2023-02-21')
     updated_at: Optional[datetime] = Field(None, example='2023-03-05')
