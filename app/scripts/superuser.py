@@ -2,8 +2,9 @@ import argparse
 
 from app.db.session import SessionLocal
 from app.crud.crud_user import user as user_crud
-from app.schemas.user import UserCreate
+from app.schemas.user import SuperuserCreate
 from app.core.security import get_password_hash
+from app.models.user import UserType
 
 
 def create_superuser(email: str, password: str, first_name: str, last_name: str):
@@ -11,12 +12,13 @@ def create_superuser(email: str, password: str, first_name: str, last_name: str)
     user = user_crud.get_by_email(db=db, email=email)
     
     if not user:
-        superuser = UserCreate(
+        superuser = SuperuserCreate(
             email=email,
-            password=get_password_hash(password),
+            password=password,
             first_name=first_name,
             last_name=last_name,
-            is_active=True  
+            is_active=True,
+            type=UserType.superadmin
         )
         user_crud.create(db=db, obj_in=superuser)
         print('Superuser created successfully')

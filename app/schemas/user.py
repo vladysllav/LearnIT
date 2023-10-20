@@ -23,6 +23,10 @@ class UserCreate(UserBase):
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
     password: str = Field(..., example="securepassword")
+    
+
+class SuperuserCreate(UserCreate):
+    type: Optional[UserType] = UserType.superadmin
 
 
 class UserLogin(BaseModel):
