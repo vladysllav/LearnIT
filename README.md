@@ -87,5 +87,6 @@ To create a superuser you need to connect to the docker container and run the sc
     ```
     docker exec -it learnit-web-1 python3 -m app.scripts.superuser <email> <password> <first_name> <last_name>
     ```
+    
 
 After that you will see a message `Superuser created successfully` if everything went well.
