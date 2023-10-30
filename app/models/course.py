@@ -19,3 +19,4 @@ class Course(Base, TimestampedModel):
     created_by_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     created_by = relationship("User", back_populates='created_courses')
     users = relationship("User", secondary=user_course_association, back_populates="courses")
+    modules = relationship("Module", back_populates="course")
