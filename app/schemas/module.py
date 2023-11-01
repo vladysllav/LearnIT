@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class BaseModule(BaseModel):
     title: Optional[str] = Field(None, example='Python Operators')
-    image: Optional[str] = Field(None, example='some/path/to/image')
+    image: Optional[str] = Field(None, example='https://s3.amazonaws.com/basket/image.jpg')
     
     
 class ModuleRead(BaseModule):
