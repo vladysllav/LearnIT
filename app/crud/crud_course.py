@@ -28,13 +28,8 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
         return db_obj
     
     
-    def update(self, db: Session, db_obj: Course, current_user: User,
+    def update(self, db: Session, db_obj: Course,
                obj_in: Union[CourseUpdate, Dict[str, Any]]) -> Course:
-        if not (current_user.id == db_obj.created_by_id or user.is_superuser(current_user)):
-            raise HTTPException(
-                status_code=403,
-                detail="You don't have permission to update this course",
-            )
             
         if isinstance(obj_in, dict):
             update_data = obj_in
