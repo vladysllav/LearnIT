@@ -12,11 +12,10 @@ class UserType(PyEnum):
     superadmin = "superadmin"
 
 
-class UserStatus(PyEnum):
-    pending = 'pending'      #Wait for the user to accept the invitation (default when user is created)
+class InvitationStatus(PyEnum):
     active = 'active'
-    deleted = 'deleted'
-    expired = 'expired'      #Invitation flow, if token has expired
+    accepted = 'accepted'
+    canceled = 'canceled'
 
 
 class User(Base, TimestampedModel):
@@ -38,6 +37,6 @@ class Invitation(Base, TimestampedModel):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     email = Column(String, unique=True, index=True)
-    status = Column(Enum(UserStatus), default = UserStatus.pending)
+    status = Column(Enum(InvitationStatus), default = InvitationStatus.active)
 
 
