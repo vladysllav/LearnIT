@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum, Date
+from sqlalchemy import Column, Integer, String, Boolean, Enum, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from app.models.base import TimestampedModel
@@ -10,6 +10,12 @@ class UserType(PyEnum):
     student = "student"
     admin = "admin"
     superadmin = "superadmin"
+
+
+class InvitationStatus(PyEnum):
+    active = 'active'
+    accepted = 'accepted'
+    canceled = 'canceled'
 
 
 class User(Base, TimestampedModel):
@@ -24,3 +30,13 @@ class User(Base, TimestampedModel):
     phone_number = Column(String, nullable=True)
     created_courses = relationship("Course", back_populates="created_by")
     courses = relationship("Course", secondary=user_course_association, back_populates="users")
+    invitation = relationship("Invitation", back_populates="user")
+
+
+class Invitation(Base, TimestampedModel):
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    email = Column(String, unique=True, index=True)
+    status = Column(Enum(InvitationStatus), default = InvitationStatus.active)
+
+

@@ -27,6 +27,14 @@ def create_access_token(
     return encoded_jwt
 
 
+def create_activation_token(user_id: int, user_email: str) -> str:
+    expire_delta = timedelta(days=7)
+    expire = datetime.utcnow() + expire_delta
+    to_encode = {'exp': expire, 'sub': user_id, 'email': user_email}
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, ALGORITHM)
+    return encoded_jwt
+
+
 def decode_access_token(token: str) -> dict:
     try:
         secret_key = settings.SECRET_KEY

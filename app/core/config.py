@@ -58,7 +58,15 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr = "admin@example.com"
     FIRST_SUPERUSER_PASSWORD: str = "password"
     USERS_OPEN_REGISTRATION: bool = False
-    EMAILS_ENABLED: bool = False
+    EMAILS_ENABLED: bool = True
+
+    EMAILS_FROM_NAME: str = os.getenv("EMAILS_FROM_NAME")
+    EMAILS_FROM_EMAIL: EmailStr = os.getenv("EMAILS_FROM_EMAIL")
+    SMTP_HOST: str = os.getenv("SMTP_HOST")
+    SMTP_PORT: str = os.getenv("SMTP_PORT")
+    SMTP_TLS: bool = os.getenv("SMTP_TLS")
+    SMTP_USER: str = os.getenv("SMTP_USER")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
 
     class Config:
         case_sensitive = True

@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from typing import Any, List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from app import crud, models, schemas
 from app.dependencies.base import get_db, get_pagination_params
 from app.dependencies.users import get_current_active_user, get_current_active_superuser
-from app.core import security
 from app.core.config import settings
 
 router = APIRouter()
