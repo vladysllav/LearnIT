@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
+import secrets
+import string
 from typing import Any, Dict, Optional
 
 import emails
@@ -31,6 +33,21 @@ def send_email(
         smtp_options["password"] = settings.SMTP_PASSWORD
     response = message.send(to=email_to, render=environment, smtp=smtp_options)
     logging.info(f"send email result: {response}")
+
+
+def send_invitation_email(email_to, url):
+    project_name = settings.PROJECT_NAME
+    subject = f'{project_name} - User Invitation'
+    template_str = f"<p>Follow the link to activate your account: <a href='{url}'>{url}</a></p>"
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=template_str,
+        environment={'project_name': project_name,
+                     'activation_url': url,
+                     'email': email_to}
+    )
 
 
 def send_test_email(email_to: str) -> None:
@@ -104,3 +121,9 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return decoded_token["email"]
     except jwt.JWTError:
         return None
+    
+
+def generate_random_password(length=12):
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for i in range(length))
+    return password

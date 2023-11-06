@@ -25,6 +25,10 @@ class UserCreate(UserBase):
     password: str = Field(..., example="securepassword")
 
 
+class CreateUserForInvitation(UserBase):
+    type: Optional[UserType] = UserType.student
+
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
