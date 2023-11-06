@@ -31,9 +31,7 @@ def create_activation_token(user_id: int, user_email: str) -> str:
     expire_delta = timedelta(days=7)
     expire = datetime.utcnow() + expire_delta
     to_encode = {'exp': expire, 'sub': user_id, 'email': user_email}
-    secret_key = settings.SECRET_KEY
-    algorithm = ALGORITHM
-    encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
 
