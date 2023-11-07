@@ -1,3 +1,5 @@
+from app.repositories.user_repository import InvitationRepository, UserRepository
+from app.services.user_service import InvitationService, UserService
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -52,3 +54,13 @@ def get_current_active_superuser(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+
+def user_service(db: Session = Depends(get_db)):
+    return UserService(UserRepository(db))
+
+
+def invitation_service(db: Session = Depends(get_db)):
+    return InvitationService(InvitationRepository(db))
+        

@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.models.user import UserType
+from app.models.user import InvitationStatus, UserType
 
 
 # Shared properties
@@ -23,6 +23,13 @@ class UserCreate(UserBase):
     is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
     password: str = Field(..., example="securepassword")
+
+
+class InvitationCreate(BaseModel):
+    email: Optional[EmailStr] = Field(None)
+    user_id: Optional[int] = Field(None)
+    status: Optional[InvitationStatus] = InvitationStatus.active
+
 
 
 class CreateUserForInvitation(UserBase):

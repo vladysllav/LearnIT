@@ -1,4 +1,4 @@
-from sqalchemy.orm import Session
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
@@ -33,15 +33,16 @@ class BaseRepository:
         return self.db.query(self.model).offset(skip).limit(limit).all()
     
 
-    def update(self, id: int, schema):
+    def update(self, id: int, schema) -> ModelType:
         self.db.query(self.model).filter(self.model.id == id).update(schema.dict(exclude_none=True))
         self.db.commit()
         return self.get_by_id(id)
     
 
-    def delete(self, id: int):
+    def delete(self, id: int) -> ModelType:
         query = self.db.query(self.model).filter(self.model.id == id).first()
         if not query:
             raise Exception
         self.db.delete(query)
         self.db.commit()
+        return query

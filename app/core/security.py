@@ -35,6 +35,12 @@ def create_activation_token(user_id: int, user_email: str) -> str:
     return encoded_jwt
 
 
+def create_activation_url(user_id: int, user_email: str) -> str:
+    token = create_activation_token(user_id, user_email)
+    url = f'https://0.0.0.0:8000/api/users/activate/{token}'
+    return url
+
+
 def decode_access_token(token: str) -> dict:
     try:
         secret_key = settings.SECRET_KEY
