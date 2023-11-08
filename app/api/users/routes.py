@@ -1,7 +1,8 @@
 from datetime import date
 from typing import Any, List
-from app.schemas.user import CreateUserForInvitation
-from app.services.user_service import InvitationService
+from app.core.security import decode_token
+from app.schemas.user import CreateUserToInvite, UserSignUp
+from app.services.user_service import UserInvitationService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from pydantic.networks import EmailStr
@@ -63,11 +64,35 @@ def create_user(
     return user
 
 
-@router.post('/invitate/')
-def invitate_user(user_schema: CreateUserForInvitation,
-                   current_user: models.User = Depends(get_current_active_superuser),
-                   invitation_service: InvitationService = Depends(invitation_service)):
-    return invitation_service.create_user_and_invitate(user_schema)
+@router.post('/invite/')
+def ivnite_user(user_schema: CreateUserToInvite,
+                   is_admin: models.User = Depends(get_current_active_superuser),
+                   invitation_service: UserInvitationService = Depends(invitation_service)):
+    user = invitation_service.user_repo.get_by_email(email=user_schema.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this username already exists in the system.",
+        )
+    return invitation_service.create_user_and_invite(user_schema)
+
+
+@router.post('/activate/{token}')
+def activate_user(user_chema: UserSignUp, token: str,
+                   invitation_service: UserInvitationService = Depends(invitation_service)):
+    payload = decode_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    
+    user = invitation_service.user_repo.get_by_id(id=payload['sub'])
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="User doesn't exists",
+        )
+    
+    return invitation_service.activate_user(user_chema, payload)
+
 
 
 

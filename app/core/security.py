@@ -27,21 +27,16 @@ def create_access_token(
     return encoded_jwt
 
 
-def create_activation_token(user_id: int, user_email: str) -> str:
+def create_activation_url(user_id: int, user_email: str) -> str:
     expire_delta = timedelta(days=7)
     expire = datetime.utcnow() + expire_delta
-    to_encode = {'exp': expire, 'sub': user_id, 'email': user_email}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, ALGORITHM)
-    return encoded_jwt
-
-
-def create_activation_url(user_id: int, user_email: str) -> str:
-    token = create_activation_token(user_id, user_email)
+    to_encode = {'exp': expire, 'sub': str(user_id), 'email': str(user_email)}
+    token = jwt.encode(to_encode, settings.SECRET_KEY, ALGORITHM)
     url = f'https://0.0.0.0:8000/api/users/activate/{token}'
     return url
 
 
-def decode_access_token(token: str) -> dict:
+def decode_token(token: str) -> dict:
     try:
         secret_key = settings.SECRET_KEY
         algorithm = ALGORITHM
