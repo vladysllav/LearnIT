@@ -17,13 +17,6 @@ class UserRepository(BaseRepository):
         return self.db.query(self.model).filter(self.model.email == email).first()
     
 
-    def authenticate(self, email: str, password: str) -> User:
-        user = self.get_by_email(email)
-        if not user or not verify_password(password, user.hashed_password):
-            return None
-        return user
-    
-
     def is_active(self, user: User) -> bool:
         return user.is_active
     

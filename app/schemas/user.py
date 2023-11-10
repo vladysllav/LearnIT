@@ -21,7 +21,7 @@ class UserSignUp(UserBase):
 
 class UserCreate(UserBase):
     type: Optional[UserType] = UserType.student
-    hashed_password: str = Field(..., example="securepassword")
+    password: str = Field(..., example="securepassword")
 
 
 class CreateUserToInvite(UserBase):

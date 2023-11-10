@@ -1,5 +1,5 @@
 from app.repositories.user_repository import InvitationRepository, UserRepository
-from app.services.user_service import UserInvitationService
+from app.services.user_service import InvitationService, UserService
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -58,5 +58,11 @@ def get_current_active_superuser(
 
 
 def invitation_service(db: Session = Depends(get_db)):
-    return UserInvitationService(UserRepository(db), InvitationRepository(db))
+    return InvitationService(UserRepository(db), InvitationRepository(db))
+
+
+def user_service(db: Session = Depends(get_db)):
+    return UserService(UserRepository(db))
+
+
         

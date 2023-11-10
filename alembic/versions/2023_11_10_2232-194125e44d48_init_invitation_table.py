@@ -1,8 +1,8 @@
-"""created Invitation table
+"""init Invitation table
 
-Revision ID: bafd227293e6
+Revision ID: 194125e44d48
 Revises: fe78a57f29e6
-Create Date: 2023-11-07 01:09:02.784539
+Create Date: 2023-11-10 22:32:26.904786
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bafd227293e6'
+revision = '194125e44d48'
 down_revision = 'fe78a57f29e6'
 branch_labels = None
 depends_on = None
@@ -26,7 +26,8 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_invitation_email'), 'invitation', ['email'], unique=True)
     op.create_index(op.f('ix_invitation_id'), 'invitation', ['id'], unique=False)
