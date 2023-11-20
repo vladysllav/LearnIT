@@ -20,12 +20,11 @@ class UserSignUp(UserBase):
 
 
 class UserCreate(UserBase):
-    is_active: Optional[bool] = Field(True, example=True)
     type: Optional[UserType] = UserType.student
     password: str = Field(..., example="securepassword")
 
 
-class CreateUserForInvitation(UserBase):
+class CreateUserToInvite(UserBase):
     type: Optional[UserType] = UserType.student
 
 

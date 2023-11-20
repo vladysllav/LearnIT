@@ -1,5 +1,7 @@
 from datetime import date
 from typing import Any, List
+from app.schemas.user import CreateUserToInvite, UserSignUp
+from app.services.user_service import InvitationService, UserService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from pydantic.networks import EmailStr
@@ -7,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.dependencies.base import get_db, get_pagination_params
-from app.dependencies.users import get_current_active_user, get_current_active_superuser
+from app.dependencies.users import get_current_active_user, get_current_active_superuser, invitation_service, user_service
 from app.core.config import settings
 
 router = APIRouter()
@@ -59,6 +61,25 @@ def create_user(
     user = crud.user.create(db, obj_in=user_in)
 
     return user
+
+
+@router.post('/invite/')
+def ivnite_user(user_schema: CreateUserToInvite,
+                   is_admin: models.User = Depends(get_current_active_superuser),
+                   invitation_service: InvitationService = Depends(invitation_service),
+                   user_service: UserService = Depends(user_service)) -> Any:
+    new_user = user_service.create_user(user_schema)
+    return invitation_service.invite_user(new_user)
+
+
+@router.post('/activate/{token}')
+def activate_user(user_chema: UserSignUp, token: str,
+                   invitation_service: InvitationService = Depends(invitation_service)) -> Any:
+    
+    return invitation_service.activate_user(user_chema, token)
+
+
+
 
 
 @router.put("/me", response_model=schemas.User)

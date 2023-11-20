@@ -30,13 +30,14 @@ class User(Base, TimestampedModel):
     phone_number = Column(String, nullable=True)
     created_courses = relationship("Course", back_populates="created_by")
     courses = relationship("Course", secondary=user_course_association, back_populates="users")
-    invitation = relationship("Invitation", back_populates="user")
+    invitation = relationship("Invitation", back_populates="user", uselist=False)
 
 
 class Invitation(Base, TimestampedModel):
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)
     email = Column(String, unique=True, index=True)
     status = Column(Enum(InvitationStatus), default = InvitationStatus.active)
+    user = relationship("User", back_populates="invitation")
 
 
