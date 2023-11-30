@@ -54,6 +54,11 @@ Here's how to get the project up and running on your local machine for developme
     ```
     cd LearnIT
     ```
+   
+3. Install poetry
+   ```
+    pip install poetry
+    ```
 
 3. Install the project dependencies:
 
