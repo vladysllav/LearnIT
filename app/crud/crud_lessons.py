@@ -10,12 +10,13 @@ from app.schemas.lessons import LessonsCreate, LessonsUpdate
 
 
 class CRUDLesson(CRUDBase[Lessons, LessonsCreate, LessonsUpdate]):
-    def create(self, db: Session, *, obj_in: LessonsCreate, current_user: User) -> Lessons:
+    def create(self, db: Session, *,obj_in: LessonsCreate, current_user: User , module_id:int) -> Lessons:
         if not current_user:
             raise HTTPException(status_code=400, detail="Invalid current user")
 
         lesson_data = obj_in.dict()
         lesson_data['created_at'] = datetime.utcnow()
+        lesson_data['module_id'] = module_id
 
         db_obj = Lessons(**lesson_data)
         db.add(db_obj)

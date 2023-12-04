@@ -3,14 +3,14 @@ from pydantic import Field
 from pydantic import BaseModel
 
 
-class BaseModule(BaseModel):
+class BaseLesson(BaseModel):
     title: Optional[str] = Field(None, example='Lessons FastApi')
     content: Optional[str] = Field(None, example='FastAPI is a modern, fast (high-performance)')
     module_id:Optional[int] = Field(None, example='1')
 
-class LessonsCreate(BaseModule):
+class LessonsCreate(BaseLesson):
     pass
 
 
-class LessonsUpdate(BaseModule):
+class LessonsUpdate(BaseLesson):
     pass
