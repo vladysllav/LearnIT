@@ -84,6 +84,7 @@ def update_module(*, db: Session = Depends(get_db), module_in: ModuleUpdate,
     return module
 
 
+
 @router.delete('/{course_id}/modules/{module_id}')
 def remove_module(*, db: Session = Depends(get_db),
                   course_access: None = Depends(check_course_access),
@@ -92,50 +93,54 @@ def remove_module(*, db: Session = Depends(get_db),
     return module
 
 
-@router.post("/{module_id}/lessons/{lessons_id}")
+@router.post("/{course_id}/modules/{module_id}/lessons/{lessons_id}")
 def create_lessons(*, db: Session = Depends(get_db), lesson_in: LessonsCreate,
                    current_user: User = Depends(get_current_user),
                    module: Module = Depends(get_module),
-                   module_id: int):
-    lesson = crud_lessons.create(db, obj_in=lesson_in, current_user=current_user, module_id=module_id)
+                   course_access: None = Depends(check_course_access)):
+    lesson = crud_lessons.create(db, obj_in=lesson_in, current_user=current_user, module_id=module.id)
     return lesson
 
-
-@router.get('/{module_id}/lessons/{lessons_id}')
+@router.get('/{course_id}/modules/{module_id}/lessons/{lessons_id}')
 def get_lessons(lessons: Lessons = Depends(get_lessons),
-                module: Module = Depends(get_module),):
+                module: Module = Depends(get_module)
+                ,course_access: None = Depends(check_course_access)):
     return lessons
 
 
-@router.get('/modules/{module_id}/lessons/')
+@router.get('/{course_id}/modules/{module_id}/lessons/')
 def get_lessons_all(db: Session = Depends(get_db),
-             module: Module = Depends(get_module),
+             module: Module = Depends(get_module)
+            ,course_access: None = Depends(check_course_access),
              skip: int = 0, limit: int = 100):
     lessons = crud_lessons.get_list(db, skip=skip, limit=limit)
     return lessons
 
 
-@router.put('/{module_id}/lessons/{lesson_id}')
+@router.put('/{course_id}/modules/{module_id}/lessons/{lesson_id}')
 def update_lesson(*, db: Session = Depends(get_db),
                   module: Module = Depends(get_module),
                   lesson: Lessons = Depends(get_lessons),
-                  lesson_in: LessonsUpdate):
+                  lesson_in: LessonsUpdate,
+                  course_access: None = Depends(check_course_access)):
     lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
     return lesson
 
 
-@router.patch('/{module_id}/lessons/{lesson_id}')
+@router.patch('/{course_id}/modules/{module_id}/lessons/{lesson_id}')
 def update_lesson(*, db: Session = Depends(get_db),
                   module: Module = Depends(get_module),
                   lesson: Lessons = Depends(get_lessons),
-                  lesson_in: LessonsUpdate):
+                  lesson_in: LessonsUpdate
+                  ,course_access: None = Depends(check_course_access)):
     lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
     return lesson
 
 
-@router.delete('/{module_id}/lessons/{lesson_id}')
+@router.delete('/{course_id}/modules/{module_id}/lessons/{lesson_id}')
 def delete_lesson(*, db: Session = Depends(get_db),
                   module: Module = Depends(get_module),
-                  lesson_id: int):
+                  lesson_id: int,
+                  course_access: None = Depends(check_course_access)):
     lessons = crud_lessons.remove(db, id=lesson_id)
     return lessons
