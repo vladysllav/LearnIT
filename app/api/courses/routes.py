@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies.lessons import get_lessons
 from app.models import Lessons
-from app.models.user import User
+from app.models.user import User, UserType
 from app.models.course import Course
 from app.models.module import Module
 
@@ -16,7 +16,7 @@ from app.schemas.lessons import LessonsCreate, LessonsUpdate
 from app.schemas.module import ModuleCreate, ModuleUpdate
 
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user ,check_permission
+from app.dependencies.users import get_current_user, PermissionChecker
 from app.dependencies.course import get_course, check_course_access, get_module
 
 from app.crud.crud_lessons import lessons as crud_lessons
@@ -37,8 +37,7 @@ def read_course_by_id(course: Course = Depends(get_course)):
 
 @router.post('/')
 def create_course(*, db: Session = Depends(get_db), course_in: CourseCreate,
-                  current_user: User = Depends(get_current_user),
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     course = crud_course.create(db, obj_in=course_in, current_user=current_user)
     return course
 
@@ -47,7 +46,7 @@ def create_course(*, db: Session = Depends(get_db), course_in: CourseCreate,
 def update_course(*, db: Session = Depends(get_db),
                   course: Course = Depends(get_course),
                   course_in: CourseUpdate,
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     course = crud_course.update(db, db_obj=course, obj_in=course_in)
     return course
 
@@ -70,9 +69,8 @@ def read_all(db: Session = Depends(get_db),
 def create_module(*, db: Session = Depends(get_db),
                   course_if_access: None = Depends(check_course_access),
                   module_in: ModuleCreate,
-                  current_user: User = Depends(get_current_user),
                   course_id: int,
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     module = crud_module.create(db, obj_in=module_in, course_id=course_id,
                                 current_user=current_user)
     return module
@@ -82,7 +80,7 @@ def create_module(*, db: Session = Depends(get_db),
 def update_module(*, db: Session = Depends(get_db), module_in: ModuleUpdate,
                   course_access: None = Depends(check_course_access),
                   module: Module = Depends(get_module),
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     module = crud_module.update(db, db_obj=module, obj_in=module_in)
     return module
 
@@ -92,17 +90,16 @@ def update_module(*, db: Session = Depends(get_db), module_in: ModuleUpdate,
 def remove_module(*, db: Session = Depends(get_db),
                   course_access: None = Depends(check_course_access),
                   module_id: int,
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     module = crud_module.remove(db, id=module_id)
     return module
 
 
 @router.post("/{course_id}/modules/{module_id}/lessons/{lessons_id}")
 def create_lessons(*, db: Session = Depends(get_db), lesson_in: LessonsCreate,
-                   current_user: User = Depends(get_current_user),
                    module: Module = Depends(get_module),
                    course_access: None = Depends(check_course_access),
-                   user_check_type: User = Depends(check_permission)):
+                   current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     lesson = crud_lessons.create(db, obj_in=lesson_in, current_user=current_user, module_id=module.id)
     return lesson
 
@@ -128,7 +125,7 @@ def update_lesson(*, db: Session = Depends(get_db),
                   lesson: Lessons = Depends(get_lessons),
                   lesson_in: LessonsUpdate,
                   course_access: None = Depends(check_course_access),
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
     return lesson
 
@@ -139,7 +136,7 @@ def update_lesson(*, db: Session = Depends(get_db),
                   lesson: Lessons = Depends(get_lessons),
                   lesson_in: LessonsUpdate
                   ,course_access: None = Depends(check_course_access),
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
     return lesson
 
@@ -149,6 +146,6 @@ def delete_lesson(*, db: Session = Depends(get_db),
                   module: Module = Depends(get_module),
                   lesson_id: int,
                   course_access: None = Depends(check_course_access),
-                  user_check_type: User = Depends(check_permission)):
+                  current_user: User = Depends(PermissionChecker([UserType.admin, UserType.superadmin]))):
     lessons = crud_lessons.remove(db, id=lesson_id)
     return lessons
