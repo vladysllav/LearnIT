@@ -1,3 +1,5 @@
+from typing import List
+
 from app.models import User
 from app.models.user import UserType
 from app.repositories.user_repository import InvitationRepository, UserRepository
@@ -65,7 +67,11 @@ def user_service(db: Session = Depends(get_db)):
     return UserService(UserRepository(db))
 
 
-def check_permission(current_user: models.User = Depends(get_current_user)):
-    if current_user.type != UserType.admin and current_user.type != UserType.superadmin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Access forbidden, admin rights required")
+class PermissionChecker:
+    def __init__(self, allowed_roles: List[UserType]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user: User = Depends(get_current_user)):
+        if current_user.type not in self.allowed_roles:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden, admin rights required")
+        return current_user
