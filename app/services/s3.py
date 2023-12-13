@@ -1,34 +1,39 @@
 import boto3
 from botocore.exceptions import ClientError
 import logging
-import os
-from dotenv import load_dotenv
 from urllib.parse import quote as urlencode
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException, status
+from app.core.config import settings
 
 
 
 class S3Service:
+    def __init__(self):
+        self.access_key = settings.AWS_ACCESS_KEY
+        self.secret_key = settings.AWS_SECRET_KEY
+        self.region_name = settings.AWS_REGION
+        self.bucket = settings.S3_BUCKET
+        self.s3_url = settings.S3_URL_TEMPLATE
+
     @property
     def client(self):
-        access_key = os.getenv('AWS_ACCESS_KEY')
-        secret_key = os.getenv('AWS_SECRET_KEY')
-        region_name = os.getenv('AWS_REGION')
-        client =  boto3.client('s3', region_name=region_name, aws_access_key_id=access_key,
-                            aws_secret_access_key=secret_key)
-        print(client)
+        client =  boto3.client('s3', region_name=self.region_name, aws_access_key_id=self.access_key,
+                            aws_secret_access_key=self.secret_key)
         return client
 
     def upload_file(self, *, file: UploadFile) -> str:
-        bucket = os.getenv('S3_BUCKET')
-        region = os.getenv('AWS_REGION')
         try:
-            self.client.upload_fileobj(file.file, bucket, file.filename)
-            url = f"https://{bucket}.s3.{region}.amazonaws.com/{urlencode(file.filename.encode('utf8'))}"
-            print(f'{file.filename} uploaded successfully')
+            self.client.upload_fileobj(file.file, self.bucket, file.filename)
+            url = self._format_url(filename=file.filename)
             return url
         except ClientError as e:
-            print(f'Failed to upload file: {e}')
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"File could not be uploaded: {e}")
+
+    def _format_url(self, filename):
+        encoded_filename = urlencode(filename.encode('utf-8'))
+        formatted_url = self.s3_url.format(bucket=self.bucket, region=self.region_name, filename=encoded_filename)
+        return formatted_url
 
 
 s3_service = S3Service()

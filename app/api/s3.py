@@ -6,5 +6,5 @@ router = APIRouter()
 
 @router.post('/upload_file/')
 def upload_file(file: UploadFile):
-    url_to_file = s3_service.upload_file(file=file)
-    return url_to_file
+    file_url = s3_service.upload_file(file=file)
+    return {'url': file_url}

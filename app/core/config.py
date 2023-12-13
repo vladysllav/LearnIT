@@ -1,6 +1,7 @@
 import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
@@ -67,6 +68,13 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = os.getenv("SMTP_TLS")
     SMTP_USER: str = os.getenv("SMTP_USER")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
+
+    AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+    AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+    AWS_REGION = os.getenv('AWS_REGION')
+    S3_BUCKET = os.getenv('S3_BUCKET')
+    S3_URL_TEMPLATE = "https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+
 
     class Config:
         case_sensitive = True
