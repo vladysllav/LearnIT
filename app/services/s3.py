@@ -13,7 +13,7 @@ class S3Service:
         self.secret_key = settings.AWS_SECRET_KEY
         self.region_name = settings.AWS_REGION
         self.bucket = settings.S3_BUCKET
-        self.s3_url = settings.S3_URL_TEMPLATE
+        self.s3_url = settings.S3_BASE_URL
 
     @property
     def client(self):
@@ -32,7 +32,7 @@ class S3Service:
 
     def _format_url(self, filename):
         encoded_filename = urlencode(filename.encode('utf-8'))
-        formatted_url = self.s3_url.format(bucket=self.bucket, region=self.region_name, filename=encoded_filename)
+        formatted_url = self.s3_url + encoded_filename
         return formatted_url
 
 

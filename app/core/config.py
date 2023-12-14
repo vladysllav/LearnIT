@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
     AWS_REGION = os.getenv('AWS_REGION')
     S3_BUCKET = os.getenv('S3_BUCKET')
-    S3_URL_TEMPLATE = "https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+    S3_BASE_URL = "https://{S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/"
 
 
     class Config:
