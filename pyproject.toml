@@ -21,8 +21,12 @@ python-multipart = "^0.0.6"
 uvicorn = "^0.23.2"
 pytest = "^7.4.0"
 bcrypt = "^4.0.1"
+fastapi-filter = "0.6.1"
+
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
