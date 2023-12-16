@@ -16,7 +16,9 @@ class CourseRead(BaseCourse):
     rating: Optional[float] = Field(None, example=4.7)
     created_at: Optional[datetime] = Field(None, example='2023-02-21')
     updated_at: Optional[datetime] = Field(None, example='2023-03-05')
-    
+
+    class Config:
+        orm_mode = True
      
 class CourseCreate(BaseCourse):
     pass
