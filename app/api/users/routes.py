@@ -186,10 +186,10 @@ def update_user(
 @router.get("/users/{user_id}/courses", response_model=List[CourseRead])
 def get_user_courses(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) \
         -> List[CourseRead]:
-    if current_user.id == user_id:
-        user_courses = db.query(Course).filter_by(created_by_id=user_id).all()
+    if current_user.id != user_id:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
 
-        if not user_courses:
-            raise HTTPException(status_code=404, detail="Courses not found")
+    user_courses = db.query(Course).filter_by(created_by_id=user_id).all()
 
-        return [CourseRead.from_orm(course) for course in user_courses]
+    return [CourseRead.from_orm(course) for course in user_courses] if user_courses else []
+
