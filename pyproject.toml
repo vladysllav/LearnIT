@@ -22,6 +22,7 @@ uvicorn = "^0.23.2"
 pytest = "^7.4.0"
 bcrypt = "^4.0.1"
 fastapi-filter = "0.6.1"
+boto3 = "1.33.11"
 
 
 
