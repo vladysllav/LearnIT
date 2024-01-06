@@ -1,6 +1,10 @@
 from datetime import date
-from typing import Any, List
-from app.schemas.user import CreateUserToInvite, UserSignUp
+from typing import Any, List, Optional
+
+from app.dependencies.course import get_course
+from app.models import Course
+from app.schemas.course import CourseRead
+from app.schemas.user import CreateUserToInvite, UserSignUp, User
 from app.services.user_service import InvitationService, UserService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
@@ -9,7 +13,8 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.dependencies.base import get_db, get_pagination_params
-from app.dependencies.users import get_current_active_user, get_current_active_superuser, invitation_service, user_service
+from app.dependencies.users import get_current_active_user, get_current_active_superuser, invitation_service, \
+    user_service, get_current_user
 from app.core.config import settings
 
 router = APIRouter()
@@ -65,21 +70,17 @@ def create_user(
 
 @router.post('/invite/')
 def ivnite_user(user_schema: CreateUserToInvite,
-                   is_admin: models.User = Depends(get_current_active_superuser),
-                   invitation_service: InvitationService = Depends(invitation_service),
-                   user_service: UserService = Depends(user_service)) -> Any:
+                is_admin: models.User = Depends(get_current_active_superuser),
+                invitation_service: InvitationService = Depends(invitation_service),
+                user_service: UserService = Depends(user_service)) -> Any:
     new_user = user_service.create_user(user_schema)
     return invitation_service.invite_user(new_user)
 
 
 @router.post('/activate/{token}')
 def activate_user(user_chema: UserSignUp, token: str,
-                   invitation_service: InvitationService = Depends(invitation_service)) -> Any:
-    
+                  invitation_service: InvitationService = Depends(invitation_service)) -> Any:
     return invitation_service.activate_user(user_chema, token)
-
-
-
 
 
 @router.put("/me", response_model=schemas.User)
@@ -180,3 +181,15 @@ def update_user(
         )
     user = crud.user.update(db, db_obj=user, obj_in=user_in)
     return user
+
+
+@router.get("/users/{user_id}/courses", response_model=List[CourseRead])
+def get_user_courses(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) \
+        -> List[CourseRead]:
+    if current_user.id != user_id:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    user_courses = db.query(Course).filter_by(created_by_id=user_id).all()
+
+    return [CourseRead.from_orm(course) for course in user_courses] if user_courses else []
+
