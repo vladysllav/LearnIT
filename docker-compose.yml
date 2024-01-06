@@ -10,6 +10,7 @@ services:
       - .:/app
     depends_on:
       - db
+      - rabbitmq
 
   db:
     image: postgres:14.1-alpine
@@ -22,6 +23,22 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      
+  rabbitmq:
+    image: "rabbitmq:3.10-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      
+  celery_worker:
+    build: .
+    command: celery -A app.services.celery worker --loglevel=info
+    depends_on:
+      - web
+      - rabbitmq
 
 volumes:
   postgres_data:
