@@ -1,7 +1,6 @@
 import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
@@ -75,6 +74,9 @@ class Settings(BaseSettings):
     S3_BUCKET = os.getenv('S3_BUCKET')
     S3_BASE_URL = "https://{S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/"
 
+    RABBITMQ_USER = os.getenv('RABBITMQ_USER')
+    RABBITMQ_PASSWORD = os.getenv('RABBITMQ_PASSWORD')
+    BROKER_URL = f'pyamqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@rabbitmq//'
 
     class Config:
         case_sensitive = True

@@ -4,6 +4,7 @@ from pathlib import Path
 import secrets
 import string
 from typing import Any, Dict, Optional
+from app.services.celery import celery
 
 import emails
 from emails.template import JinjaTemplate
@@ -31,10 +32,14 @@ def send_email(
         smtp_options["user"] = settings.SMTP_USER
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
-    response = message.send(to=email_to, render=environment, smtp=smtp_options)
+    try:
+        response = message.send(to=email_to, render=environment, smtp=smtp_options)
+    except Exception as e:
+        logging.info(f'ERROR: {e}')
     logging.info(f"send email result: {response}")
 
 
+@celery.task
 def send_invitation_email(email_to, url):
     project_name = settings.PROJECT_NAME
     subject = f'{project_name} - User Invitation'
