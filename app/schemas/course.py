@@ -19,7 +19,12 @@ class CourseRead(BaseCourse):
 
     class Config:
         orm_mode = True
-     
+
+
+class CourseRatingCreate(BaseModel):
+    rating_value: Optional[float] = Field(None, example=4.5)
+
+
 class CourseCreate(BaseCourse):
     pass
     

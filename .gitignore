@@ -116,6 +116,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+lms_project/
 
 # PyCharm
 .idea/

@@ -1,4 +1,4 @@
-from fastapi import APIRouter , Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.dependencies.lessons import get_lessons
@@ -9,19 +9,21 @@ from app.models.course import Course
 from app.models.module import Module
 
 from app.crud.crud_course import course as crud_course
+from app.crud.crud_course import course_rating as crud_course_rating
 from app.crud.crud_module import module as crud_module
-from app.schemas.course import CourseUpdate, CourseCreate, CourseRead
+from app.schemas.course import CourseUpdate, CourseCreate, CourseRead, CourseRatingCreate
 from app.schemas.lessons import LessonsCreate, LessonsUpdate
 from app.schemas.module import ModuleCreate, ModuleUpdate
 
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user, PermissionChecker
+from app.dependencies.users import get_current_user, PermissionChecker, PermissionCheckerRating
 from app.dependencies.course import get_course, check_course_access, get_module
 
 from app.crud.crud_lessons import lessons as crud_lessons
 
 router = APIRouter()
 allow_create_resource = PermissionChecker([UserType.admin, UserType.superadmin])
+allow_add_rating = PermissionCheckerRating(UserType.student)
 
 # @router.get('/')
 # def read_all(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
@@ -29,17 +31,50 @@ allow_create_resource = PermissionChecker([UserType.admin, UserType.superadmin])
 #     return courses
 
 
-
-
 @router.get('/')
 def read_all(filters: CourseFilter = Depends(), db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
     return filters.filter_courses(db, skip, limit)
 
 
-
 @router.get('/{course_id}')
-def read_course_by_id(course: Course = Depends(get_course)):
+def read_course_by_id(course: Course = Depends(get_course), db: Session = Depends(get_db)):
+    ratings = crud_course_rating.get_ratings_for_course(db, course_id=course.id)
+    average_rating = 0.0
+
+    if ratings:
+        average_rating = sum(rating.rating_value for rating in ratings) / len(ratings)
+
+    course.rating = average_rating
+    db.commit()
+
     return course
+
+
+@router.post("/courses/{course_id}/rate", dependencies=[Depends(allow_add_rating)])
+def rate_course(
+    rating_data: CourseRatingCreate,
+    course: Course = Depends(get_course),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rating_value = rating_data.rating_value
+
+    if not (0.0 <= rating_value <= 5.0):
+        raise HTTPException(status_code=400, detail="Invalid rating. Must be between 0 and 5.")
+
+    existing_rating = crud_course_rating.get(
+        db=db,
+        user_id=current_user.id,
+        course_id=course.id
+    )
+
+    if existing_rating:
+        raise HTTPException(status_code=400, detail="You have already rated this course.")
+
+    return crud_course_rating.create(
+        db=db,
+        obj_in={"user_id": current_user.id, "course_id": course.id, "rating_value": rating_value}
+    )
 
 
 @router.post('/', dependencies=[Depends(allow_create_resource)])

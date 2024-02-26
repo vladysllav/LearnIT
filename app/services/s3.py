@@ -6,7 +6,6 @@ from fastapi import UploadFile, HTTPException, status
 from app.core.config import settings
 
 
-
 class S3Service:
     def __init__(self):
         self.access_key = settings.AWS_ACCESS_KEY
@@ -17,7 +16,7 @@ class S3Service:
 
     @property
     def client(self):
-        client =  boto3.client('s3', region_name=self.region_name, aws_access_key_id=self.access_key,
+        client = boto3.client('s3', region_name=self.region_name, aws_access_key_id=self.access_key,
                             aws_secret_access_key=self.secret_key)
         return client
 

@@ -9,8 +9,6 @@ from app.dependencies.users import get_current_user
 from app.crud.crud_user import user
 
 
-
-
 def get_course(course_id: int, db: Session = Depends(get_db)):
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
