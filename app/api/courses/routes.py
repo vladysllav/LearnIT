@@ -25,11 +25,6 @@ router = APIRouter()
 allow_create_resource = PermissionChecker([UserType.admin, UserType.superadmin])
 allow_add_rating = PermissionCheckerRating(UserType.student)
 
-# @router.get('/')
-# def read_all(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-#     courses = crud_course.get_list(db, skip=skip, limit=limit)
-#     return courses
-
 
 @router.get('/')
 def read_all(filters: CourseFilter = Depends(), db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
@@ -145,15 +140,15 @@ def create_lessons(*, db: Session = Depends(get_db), lesson_in: LessonsCreate,
 
 @router.get('/{course_id}/modules/{module_id}/lessons/{lessons_id}')
 def get_lessons(lessons: Lessons = Depends(get_lessons),
-                module: Module = Depends(get_module)
-                , course_access: None = Depends(check_course_access)):
+                module: Module = Depends(get_module),
+                course_access: None = Depends(check_course_access)):
     return lessons
 
 
 @router.get('/{course_id}/modules/{module_id}/lessons/')
 def get_lessons_all(db: Session = Depends(get_db),
-                    module: Module = Depends(get_module)
-                    , course_access: None = Depends(check_course_access),
+                    module: Module = Depends(get_module),
+                    course_access: None = Depends(check_course_access),
                     skip: int = 0, limit: int = 100):
     lessons = crud_lessons.get_list(db, skip=skip, limit=limit)
     return lessons
@@ -165,16 +160,6 @@ def update_lesson(*, db: Session = Depends(get_db),
                   lesson: Lessons = Depends(get_lessons),
                   lesson_in: LessonsUpdate,
                   course_access: None = Depends(check_course_access)):
-    lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
-    return lesson
-
-
-@router.patch('/{course_id}/modules/{module_id}/lessons/{lesson_id}', dependencies=[Depends(allow_create_resource)])
-def update_lesson(*, db: Session = Depends(get_db),
-                  module: Module = Depends(get_module),
-                  lesson: Lessons = Depends(get_lessons),
-                  lesson_in: LessonsUpdate
-                  , course_access: None = Depends(check_course_access)):
     lesson = crud_lessons.update(db, db_obj=lesson, obj_in=lesson_in)
     return lesson
 
