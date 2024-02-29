@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 from sqlalchemy.orm import Session
 
@@ -39,12 +39,26 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
+    
+    def get_multi(
+        self,
+        db: Session,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        filter_by: Optional[Dict[str, Any]] = None,
+    ) -> List[User]:
+
+        query = db.query(User)
+
+        if filter_by:
+            query = query.filter(**filter_by)
+        return query.offset(skip).limit(limit).all()
 
     def is_active(self, user: User) -> bool:
         return user.is_active
 
     def is_superuser(self, user: User) -> bool:
         return user.type == UserType.superadmin
-
 
 user = CRUDUser(User)
