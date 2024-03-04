@@ -10,8 +10,10 @@ load_dotenv()
 
 class Settings(BaseSettings):
     API_STR: str = "/api"
-    SECRET_KEY: str = os.getenv('SECRET_KEY', secrets.token_urlsafe(32))
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    JWT_SECRET_KEY: str = os.getenv('JWT_SECRET_KEY', secrets.token_urlsafe(32))
+    JWT_REFRESH_SECRET_KEY: str = os.getenv('JWT_REFRESH_SECRET_KEY', secrets.token_urlsafe(32))
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 30
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     SERVER_NAME: str = 'learnit'
     SERVER_HOST: str = '0.0.0.0'
     SERVER_PORT: int = 8000
