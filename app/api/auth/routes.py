@@ -7,18 +7,16 @@ from sqlalchemy import and_
 
 from app import crud, models, schemas
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user, get_current_active_user
+from app.dependencies.users import get_current_user
 from app.core.security import get_password_hash, decode_refresh_token, create_access_token, create_refresh_token
 from app.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,
 )
-from fastapi.security import OAuth2PasswordBearer
 from app.models.user import User
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth")
 
 
 @router.post("/login", response_model=schemas.TokenResponse)
