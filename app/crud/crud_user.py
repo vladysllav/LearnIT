@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
@@ -46,20 +46,5 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def is_superuser(self, user: User) -> bool:
         return user.type == UserType.superadmin
     
-    def get_multi(
-        self,
-        db: Session,
-        *,
-        skip: int = 0,
-        limit: int = 100,
-        filter_by: Optional[Dict[str, Any]] = None,
-    ) -> List[User]:
-        query = db.query(User)
-
-        if filter_by:
-            query = query.filter(**filter_by)
-        return query.offset(skip).limit(limit).all()
-    
-
 
 user = CRUDUser(User)
