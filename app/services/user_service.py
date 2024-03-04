@@ -49,7 +49,7 @@ class InvitationService:
 
     def invite_user(self, user: User) -> Invitation:
         activation_url = create_activation_url(user_id=user.id, user_email=user.email)
-        send_invitation_email.delay(email_to=user.email, url=activation_url)
+        send_invitation_email.apply_async(kwargs={'email_to': user.email, 'url': activation_url}, countdown=1)
         invitation = self.create_invitation(user)
         return invitation
     
