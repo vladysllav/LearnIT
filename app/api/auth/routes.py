@@ -14,6 +14,7 @@ from app.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,
+    validate_password
 )
 
 router = APIRouter()
@@ -111,6 +112,10 @@ def sign_up(
             status_code=409,
             detail="The user with this email already exists in the system.",
         )
+    validation_response, msg = validate_password(user_in.password)
+    if not validation_response:
+        raise HTTPException(status_code=400, detail=msg)
+
     user = crud.user.create(db, obj_in=user_in)
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
