@@ -40,7 +40,7 @@ def read_users(
     """
     skip = pagination["skip"]
     limit = pagination["limit"]
-    users = crud.user.get_multi(db, skip=skip, limit=limit)
+    users = crud.user.get_list(db, skip=skip, limit=limit)
     total = crud.user.get_total_count(db)
 
     response.headers["X-Total-Count"] = str(total)

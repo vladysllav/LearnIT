@@ -106,10 +106,8 @@ def read_all(db: Session = Depends(get_db),
 def create_module(*, db: Session = Depends(get_db),
                   course_if_access: None = Depends(check_course_access),
                   module_in: ModuleCreate,
-                  current_user: User = Depends(get_current_user),
                   course_id: int):
-    module = crud_module.create(db, obj_in=module_in, course_id=course_id,
-                                current_user=current_user)
+    module = crud_module.create(db, obj_in=module_in, course_id=course_id)
     return module
 
 
