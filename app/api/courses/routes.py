@@ -16,14 +16,14 @@ from app.schemas.lessons import LessonsCreate, LessonsUpdate
 from app.schemas.module import ModuleCreate, ModuleUpdate
 
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user, PermissionChecker, PermissionCheckerRating
+from app.dependencies.users import get_current_user, PermissionChecker
 from app.dependencies.course import get_course, check_course_access, get_module
 
 from app.crud.crud_lessons import lessons as crud_lessons
 
 router = APIRouter()
 allow_create_resource = PermissionChecker([UserType.admin, UserType.superadmin])
-allow_add_rating = PermissionCheckerRating(UserType.student)
+allow_add_rating = PermissionChecker([UserType.student])
 
 
 @router.get('/')
@@ -31,44 +31,29 @@ def read_all(filters: CourseFilter = Depends(), db: Session = Depends(get_db), s
     return filters.filter_courses(db, skip, limit)
 
 
-@router.get('/{course_id}')
-def read_course_by_id(course: Course = Depends(get_course), db: Session = Depends(get_db)):
-    ratings = crud_course_rating.get_ratings_for_course(db, course_id=course.id)
-    average_rating = 0.0
-
-    if ratings:
-        average_rating = sum(rating.rating_value for rating in ratings) / len(ratings)
-
-    course.rating = average_rating
-    db.commit()
+@router.get('/{course_id}', response_model=CourseRead)
+def read_course_by_id(
+        course_id: int,
+        db: Session = Depends(get_db)
+):
+    course = crud_course.update_course_rating(db, course_id=course_id)
 
     return course
 
 
-@router.post("/courses/{course_id}/rate", dependencies=[Depends(allow_add_rating)])
-def rate_course(
+@router.post("/courses/{course_id}/ratings", dependencies=[Depends(allow_add_rating)])
+def create_course_rating(
+    course_id: int,
     rating_data: CourseRatingCreate,
-    course: Course = Depends(get_course),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    rating_value = rating_data.rating_value
-
-    if not (0.0 <= rating_value <= 5.0):
-        raise HTTPException(status_code=400, detail="Invalid rating. Must be between 0 and 5.")
-
-    existing_rating = crud_course_rating.get(
-        db=db,
-        user_id=current_user.id,
-        course_id=course.id
-    )
-
-    if existing_rating:
-        raise HTTPException(status_code=400, detail="You have already rated this course.")
 
     return crud_course_rating.create(
         db=db,
-        obj_in={"user_id": current_user.id, "course_id": course.id, "rating_value": rating_value}
+        user_id=current_user.id,
+        course_id=course_id,
+        **rating_data.dict()
     )
 
 

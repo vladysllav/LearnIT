@@ -36,6 +36,14 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
+    def update_course_rating(self, db: Session, course_id: int):
+        course = db.query(self.model).filter(self.model.id == course_id).first()
+
+        course.rating = course.average_rating
+        db.commit()
+
+        return course
+
 
 class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):
     def get(self, db: Session, *, user_id: int, course_id: int) -> CourseRating:
@@ -45,12 +53,24 @@ class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):
         ).first()
 
     def create(
-        self,
-        db: Session,
-        *,
-        obj_in: dict
+            self,
+            db: Session,
+            *,
+            user_id: int,
+            course_id: int,
+            rating_value: int
     ) -> CourseRating:
-        db_obj = self.model(**obj_in)
+        # Перевірка на допустимий діапазон рейтингу
+        if not (0 <= rating_value <= 5):
+            raise HTTPException(status_code=400, detail="Invalid rating. Must be between 0 and 5.")
+
+        # Перевірка існування рейтингу для користувача та курсу
+        existing_rating = self.get(db=db, user_id=user_id, course_id=course_id)
+        if existing_rating:
+            raise HTTPException(status_code=400, detail="You have already rated this course.")
+
+        # Створення нового рейтингу
+        db_obj = self.model(user_id=user_id, course_id=course_id, rating_value=rating_value)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

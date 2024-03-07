@@ -22,7 +22,7 @@ class CourseRead(BaseCourse):
 
 
 class CourseRatingCreate(BaseModel):
-    rating_value: Optional[float] = Field(None, example=4.5)
+    rating_value: Optional[int] = Field(None, example=4)
 
 
 class CourseCreate(BaseCourse):

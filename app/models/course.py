@@ -3,10 +3,11 @@ from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from app.models.base import TimestampedModel
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 user_course_association = Table('user_course_association', Base.metadata,
-Column('user_id', Integer, ForeignKey('user.id')),
+    Column('user_id', Integer, ForeignKey('user.id')),
     Column('course_id', Integer, ForeignKey('course.id'))
 )
 
@@ -23,12 +24,18 @@ class Course(Base, TimestampedModel):
     modules = relationship("Module", back_populates="course")
     course_ratings = relationship("CourseRating", back_populates="course")
 
+    @hybrid_property
+    def average_rating(self):
+        if not self.course_ratings:
+            return 0
+        return sum(rating.rating_value for rating in self.course_ratings) / len(self.course_ratings)
+
 
 class CourseRating(Base, TimestampedModel):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     course_id = Column(Integer, ForeignKey('course.id'), nullable=False)
-    rating_value = Column(Float, nullable=False)
+    rating_value = Column(Integer, nullable=False)
 
     user = relationship("User", back_populates="ratings")
     course = relationship("Course", back_populates="course_ratings")
