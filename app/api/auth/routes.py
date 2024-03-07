@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user
+from app.dependencies.users import get_current_user, get_user_service
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
@@ -14,8 +14,8 @@ from app.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,
-    validate_password
 )
+from app.services.user_service import UserService
 
 router = APIRouter()
 
@@ -102,6 +102,7 @@ def sign_up(
         *,
         db: Session = Depends(get_db),
         user_in: schemas.UserSignUp,
+        user_service: UserService = Depends(get_user_service)
 ) -> Any:
     """
     Sign Up as a new student.
@@ -112,7 +113,7 @@ def sign_up(
             status_code=409,
             detail="The user with this email already exists in the system.",
         )
-    validation_response, msg = validate_password(user_in.password)
+    validation_response, msg = user_service.validate_password(user_in.password)
     if not validation_response:
         raise HTTPException(status_code=400, detail=msg)
 

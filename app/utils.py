@@ -9,7 +9,6 @@ from app.services.celery import celery
 import emails
 from emails.template import JinjaTemplate
 from jose import jwt
-import re
 
 from app.core.config import settings
 
@@ -127,17 +126,6 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return decoded_token["email"]
     except jwt.JWTError:
         return None
-
-
-def validate_password(password: str) -> tuple[bool, str]:
-    if not re.search(r"\d", password):
-        return False, "Password must contain at least one digit."
-    if not re.search(r"[a-z]", password):
-        return False, "Password must contain at least one lowercase letter."
-    if not re.search(r"[A-Z]", password):
-        return False, "Password must contain at least one uppercase letter."
-
-    return True, "Password is valid"
 
 
 def generate_random_password(length=12):

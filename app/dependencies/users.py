@@ -59,11 +59,11 @@ def get_current_active_superuser(
     return current_user
 
 
-def invitation_service(db: Session = Depends(get_db)):
+def get_invitation_service(db: Session = Depends(get_db)):
     return InvitationService(UserRepository(db), InvitationRepository(db))
 
 
-def user_service(db: Session = Depends(get_db)):
+def get_user_service(db: Session = Depends(get_db)):
     return UserService(UserRepository(db))
 
 
