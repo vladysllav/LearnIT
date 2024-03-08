@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Request, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from app.core.security import decode_token
+from app.core.security import decode_access_token
 
 
 class JWTBearer(HTTPBearer):
@@ -35,7 +35,7 @@ class JWTBearer(HTTPBearer):
         Verifies the JWT token and returns True if valid, otherwise False.
         """
         try:
-            payload = decode_token(jwt_token)
+            payload = decode_access_token(jwt_token)
             return bool(payload)
         except Exception as e:
             return False

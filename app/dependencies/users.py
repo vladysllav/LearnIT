@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app import crud, models, schemas
-from app.core.security import decode_token
+from app.core.security import decode_access_token
 from app.api.auth_bearer import JWTBearer
 from app.dependencies.base import get_db
 
@@ -28,7 +28,7 @@ def get_current_user(
         db: Session = Depends(get_db), token: str = Depends(jwt_bearer)
 ) -> models.User:
     try:
-        payload = decode_token(token)
+        payload = decode_access_token(token)
         token_data = schemas.TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
