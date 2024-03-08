@@ -1,7 +1,10 @@
 from fastapi import HTTPException
+import re
+
 from app.models.user import Invitation, InvitationStatus, User
 from app.repositories.base_repository import BaseRepository
 from app.schemas.user import CreateUserToInvite, UserSignUp
+
 from app.utils import generate_random_password, send_invitation_email
 from app.core.security import create_activation_url, decode_access_token, get_password_hash, verify_password
 
@@ -30,13 +33,26 @@ class UserService:
         if not user or not verify_password(password, user.hashed_password):
             return None
         return user
+
+    def validate_password(self, password: str) -> tuple[bool, str]:
+        if not re.search(r"\d", password):
+            return False, "Password must contain at least one digit."
+        if not re.search(r"[a-z]", password):
+            return False, "Password must contain at least one lowercase letter."
+        if not re.search(r"[A-Z]", password):
+            return False, "Password must contain at least one uppercase letter."
+
+        return True, "Password is valid"
         
     
+
+
 
 class InvitationService:
     def __init__(self, user_repo: BaseRepository, invitation_repo: BaseRepository):
         self.user_repo = user_repo
         self.invitation_repo = invitation_repo
+        self.user_service = UserService(self.user_repo)
     
 
     def create_invitation(self, user: User) -> Invitation:
@@ -68,7 +84,13 @@ class InvitationService:
             detail="User doesn't exists",
             )
         user_data = user_schema.dict()
-        user_data['hashed_password'] = get_password_hash(user_data.pop('password'))
+
+        password = user_data.pop('password')
+        validation_response, msg = self.user_service.validate_password(password)
+        if not validation_response:
+            raise HTTPException(status_code=400, detail=msg)
+
+        user_data['hashed_password'] = get_password_hash(password)
         user_data['is_active'] = True
         user = self.user_repo.update(id=user_id, dict_data=user_data)
 
