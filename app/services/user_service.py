@@ -4,8 +4,9 @@ import re
 from app.models.user import Invitation, InvitationStatus, User
 from app.repositories.base_repository import BaseRepository
 from app.schemas.user import CreateUserToInvite, UserSignUp
-from app.utils import generate_random_password, send_invitation_email, validate_password
-from app.core.security import create_activation_url, decode_token, get_password_hash, verify_password
+
+from app.utils import generate_random_password, send_invitation_email
+from app.core.security import create_activation_url, decode_access_token, get_password_hash, verify_password
 
 
 class UserService:
@@ -64,13 +65,13 @@ class InvitationService:
 
     def invite_user(self, user: User) -> Invitation:
         activation_url = create_activation_url(user_id=user.id, user_email=user.email)
-        send_invitation_email.delay(email_to=user.email, url=activation_url)
+        send_invitation_email.apply_async(kwargs={'email_to': user.email, 'url': activation_url}, countdown=1)
         invitation = self.create_invitation(user)
         return invitation
     
 
     def activate_user(self, user_schema: UserSignUp, token: str) -> User:
-        token_payload = decode_token(token)
+        token_payload = decode_access_token(token)
         if not token_payload:
             raise HTTPException(status_code=401, detail="Token has expired")
         user_id = token_payload.get('sub')
