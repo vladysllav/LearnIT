@@ -27,7 +27,7 @@ class Course(Base, TimestampedModel):
     @hybrid_property
     def average_rating(self):
         if not self.course_ratings:
-            return 0
+            return None
         return sum(rating.rating_value for rating in self.course_ratings) / len(self.course_ratings)
 
 

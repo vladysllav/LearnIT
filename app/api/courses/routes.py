@@ -11,7 +11,7 @@ from app.models.module import Module
 from app.crud.crud_course import course as crud_course
 from app.crud.crud_course import course_rating as crud_course_rating
 from app.crud.crud_module import module as crud_module
-from app.schemas.course import CourseUpdate, CourseCreate, CourseRead, CourseRatingCreate
+from app.schemas.course import CourseUpdate, CourseCreate, CourseRead, CourseRatingCreate, CourseRatingRead
 from app.schemas.lessons import LessonsCreate, LessonsUpdate
 from app.schemas.module import ModuleCreate, ModuleUpdate
 
@@ -32,16 +32,12 @@ def read_all(filters: CourseFilter = Depends(), db: Session = Depends(get_db), s
 
 
 @router.get('/{course_id}', response_model=CourseRead)
-def read_course_by_id(
-        course_id: int,
-        db: Session = Depends(get_db)
-):
-    course = crud_course.update_course_rating(db, course_id=course_id)
-
+def read_course_by_id(course: Course = Depends(get_course)):
     return course
 
 
-@router.post("/courses/{course_id}/ratings", dependencies=[Depends(allow_add_rating)])
+@router.post("/courses/{course_id}/ratings", dependencies=[Depends(allow_add_rating)],
+             response_model=CourseRatingRead)
 def create_course_rating(
     course_id: int,
     rating_data: CourseRatingCreate,
