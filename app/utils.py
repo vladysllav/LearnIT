@@ -14,10 +14,10 @@ from app.core.config import settings
 
 
 def send_email(
-    email_to: str,
-    subject_template: str = "",
-    html_template: str = "",
-    environment: Dict[str, Any] = {},
+        email_to: str,
+        subject_template: str = "",
+        html_template: str = "",
+        environment: Dict[str, Any] = {},
 ) -> None:
     assert settings.EMAILS_ENABLED, "no provided configuration for email variables"
     message = emails.Message(
@@ -126,7 +126,7 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return decoded_token["email"]
     except jwt.JWTError:
         return None
-    
+
 
 def generate_random_password(length=12):
     alphabet = string.ascii_letters + string.digits

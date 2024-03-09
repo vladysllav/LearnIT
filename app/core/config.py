@@ -9,9 +9,14 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
+    DOMAIN_NAME = os.getenv('DOMAIN_NAME')
     API_STR: str = "/api"
-    SECRET_KEY: str = os.getenv('SECRET_KEY', secrets.token_urlsafe(32))
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+
+    JWT_SECRET_KEY: str = os.getenv('JWT_SECRET_KEY', secrets.token_urlsafe(32))
+    JWT_REFRESH_SECRET_KEY: str = os.getenv('JWT_REFRESH_SECRET_KEY', secrets.token_urlsafe(32))
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 30
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+
     SERVER_NAME: str = 'learnit'
     SERVER_HOST: str = '0.0.0.0'
     SERVER_PORT: int = 8000
@@ -74,9 +79,7 @@ class Settings(BaseSettings):
     S3_BUCKET = os.getenv('S3_BUCKET')
     S3_BASE_URL = "https://{S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/"
 
-    RABBITMQ_USER = os.getenv('RABBITMQ_USER')
-    RABBITMQ_PASSWORD = os.getenv('RABBITMQ_PASSWORD')
-    BROKER_URL = f'pyamqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@rabbitmq//'
+    BROKER_URL = 'redis://redis:6379/0'
 
     class Config:
         case_sensitive = True

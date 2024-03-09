@@ -1,7 +1,6 @@
 from datetime import date
-from typing import Any, List, Optional
+from typing import Any, List
 
-from app.dependencies.course import get_course
 from app.models import Course
 from app.schemas.course import CourseRead
 from app.schemas.user import CreateUserToInvite, UserSignUp, User
@@ -16,8 +15,8 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.dependencies.base import get_db, get_pagination_params
-from app.dependencies.users import get_current_active_user, get_current_active_superuser, invitation_service, \
-    user_service, get_current_user
+from app.dependencies.users import get_current_active_user, get_current_active_superuser, get_invitation_service, \
+    get_user_service, get_current_user
 from app.core.config import settings
 
 router = APIRouter()
@@ -74,16 +73,16 @@ def create_user(
 @router.post('/invite/')
 def ivnite_user(user_schema: CreateUserToInvite,
                 is_admin: models.User = Depends(get_current_active_superuser),
-                invitation_service: InvitationService = Depends(invitation_service),
-                user_service: UserService = Depends(user_service)) -> Any:
+                invitation_service: InvitationService = Depends(get_invitation_service),
+                user_service: UserService = Depends(get_user_service)) -> Any:
     new_user = user_service.create_user(user_schema)
     return invitation_service.invite_user(new_user)
 
 
 @router.post('/activate/{token}')
-def activate_user(user_chema: UserSignUp, token: str,
-                  invitation_service: InvitationService = Depends(invitation_service)) -> Any:
-    return invitation_service.activate_user(user_chema, token)
+def activate_user(user_schema: UserSignUp, token: str,
+                  invitation_service: InvitationService = Depends(get_invitation_service)) -> Any:
+    return invitation_service.activate_user(user_schema, token)
 
 
 @router.put("/me", response_model=schemas.User)
@@ -102,7 +101,6 @@ def update_user_me(
 
 @router.get("/me", response_model=schemas.User)
 def read_user_me(
-        db: Session = Depends(get_db),
         current_user: models.User = Depends(get_current_active_user),
 ) -> Any:
     """

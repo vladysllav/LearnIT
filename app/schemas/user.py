@@ -2,6 +2,7 @@ from datetime import date
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
+from typing import Any
 
 from app.models.user import UserType
 
@@ -17,6 +18,11 @@ class UserBase(BaseModel):
 
 class UserSignUp(UserBase):
     password: str = Field(..., example="securepassword")
+
+
+class SignUpResponse(BaseModel):
+    user_detail: dict[str, Any]
+    tokens: dict[str, str]
 
 
 class UserCreate(UserBase):
