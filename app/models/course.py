@@ -4,6 +4,7 @@ from app.db.base_class import Base
 from app.models.base import TimestampedModel
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import select, func
 
 
 user_course_association = Table('user_course_association', Base.metadata,
@@ -17,7 +18,6 @@ class Course(Base, TimestampedModel):
     name = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
-    rating = Column(Float, nullable=True)
     created_by_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     created_by = relationship("User", back_populates='created_courses')
     users = relationship("User", secondary=user_course_association, back_populates="courses")
@@ -25,17 +25,17 @@ class Course(Base, TimestampedModel):
     course_ratings = relationship("CourseRating", back_populates="course")
 
     @hybrid_property
-    def average_rating(self):
+    def rating(self):
         if not self.course_ratings:
             return None
-        return sum(rating.rating_value for rating in self.course_ratings) / len(self.course_ratings)
+        return sum(rating.value for rating in self.course_ratings) / len(self.course_ratings)
 
 
 class CourseRating(Base, TimestampedModel):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     course_id = Column(Integer, ForeignKey('course.id'), nullable=False)
-    rating_value = Column(Integer, nullable=False)
+    value = Column(Integer, nullable=False)
 
     user = relationship("User", back_populates="ratings")
     course = relationship("Course", back_populates="course_ratings")

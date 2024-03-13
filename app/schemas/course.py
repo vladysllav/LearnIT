@@ -12,7 +12,7 @@ class BaseCourse(BaseModel):
 
 
 class BaseCourseRating(BaseModel):
-    rating_value: Optional[int] = Field(None, example=4)
+    value: Optional[int] = Field(None, example=4)
 
 
 class CourseRead(BaseCourse):

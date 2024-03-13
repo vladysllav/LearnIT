@@ -50,27 +50,24 @@ class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):
             *,
             user_id: int,
             course_id: int,
-            rating_value: int
+            value: int
     ) -> CourseRating:
 
         course = db.query(Course).filter(Course.id == course_id).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
-        if not (1 <= rating_value <= 5):
+        if not (1 <= value <= 5):
             raise HTTPException(status_code=400, detail="Invalid rating. Must be between 1 and 5.")
 
         existing_rating = self.get(db=db, user_id=user_id, course_id=course_id)
         if existing_rating:
             raise HTTPException(status_code=400, detail="You have already rated this course.")
 
-        db_obj = self.model(user_id=user_id, course_id=course_id, rating_value=rating_value)
+        db_obj = self.model(user_id=user_id, course_id=course_id, value=value)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-
-        course.rating = course.average_rating
-        db.commit()
 
         return db_obj
 
