@@ -4,7 +4,6 @@ from app.db.base_class import Base
 from app.models.base import TimestampedModel
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import select, func
 
 
 user_course_association = Table('user_course_association', Base.metadata,

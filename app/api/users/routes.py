@@ -4,9 +4,8 @@ from app.schemas.course import CourseRead
 from app.schemas.user import CreateUserToInvite, UserSignUp, User
 from app.services.user_service import InvitationService, UserService
 
-from fastapi import Response
 from typing import Any, List
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
