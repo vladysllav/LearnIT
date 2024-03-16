@@ -31,6 +31,7 @@ class User(Base, TimestampedModel):
     created_courses = relationship("Course", back_populates="created_by")
     courses = relationship("Course", secondary=user_course_association, back_populates="users")
     invitation = relationship("Invitation", back_populates="user", uselist=False)
+    ratings = relationship("CourseRating", back_populates="user")
 
 
 class Invitation(Base, TimestampedModel):

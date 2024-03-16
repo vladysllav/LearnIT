@@ -1,11 +1,10 @@
 from datetime import date
-from typing import Any, List
-
 from app.models import Course
 from app.schemas.course import CourseRead
 from app.schemas.user import CreateUserToInvite, UserSignUp, User
 from app.services.user_service import InvitationService, UserService
 
+from typing import Any, List
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session

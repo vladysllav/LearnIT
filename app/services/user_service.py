@@ -13,7 +13,6 @@ class UserService:
     def __init__(self, user_repo: BaseRepository):
         self.user_repo = user_repo
 
-    
     def create_user(self, user_schema: CreateUserToInvite) -> User:
         user = self.user_repo.get_by_email(email=user_schema.email)
         if user:
@@ -43,9 +42,6 @@ class UserService:
             return False, "Password must contain at least one uppercase letter."
 
         return True, "Password is valid"
-        
-    
-
 
 
 class InvitationService:
@@ -53,7 +49,6 @@ class InvitationService:
         self.user_repo = user_repo
         self.invitation_repo = invitation_repo
         self.user_service = UserService(self.user_repo)
-    
 
     def create_invitation(self, user: User) -> Invitation:
         invitation_data = {'email': user.email,
@@ -61,14 +56,12 @@ class InvitationService:
                       'status': InvitationStatus.active}
         invitation = self.invitation_repo.create(invitation_data)
         return invitation
-    
 
     def invite_user(self, user: User) -> Invitation:
         activation_url = create_activation_url(user_id=user.id, user_email=user.email)
         send_invitation_email.apply_async(kwargs={'email_to': user.email, 'url': activation_url}, countdown=1)
         invitation = self.create_invitation(user)
         return invitation
-    
 
     def activate_user(self, user_schema: UserSignUp, token: str) -> User:
         token_payload = decode_access_token(token)
@@ -98,11 +91,3 @@ class InvitationService:
         update_invitation = {'status': InvitationStatus.accepted}
         self.invitation_repo.update(id=invitation.id, dict_data=update_invitation)
         return user
-
-
-    
-
-    
-
-    
-
