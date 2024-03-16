@@ -4,6 +4,7 @@ from app.db.base_class import Base
 from app.models.base import TimestampedModel
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
+from statistics import mean
 
 
 user_course_association = Table('user_course_association', Base.metadata,
@@ -27,7 +28,7 @@ class Course(Base, TimestampedModel):
     def rating(self):
         if not self.course_ratings:
             return None
-        return sum(rating.value for rating in self.course_ratings) / len(self.course_ratings)
+        return mean(rating.value for rating in self.course_ratings)
 
 
 class CourseRating(Base, TimestampedModel):

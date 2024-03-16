@@ -70,9 +70,6 @@ class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):
         db.refresh(db_obj)
 
         return db_obj
-
-    def get_ratings_for_course(self, db: Session, *, course_id: int):
-        return db.query(self.model).filter(self.model.course_id == course_id).all()
         
     
 course = CRUDCourse(Course)
