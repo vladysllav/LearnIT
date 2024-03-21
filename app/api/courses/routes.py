@@ -94,7 +94,7 @@ def add_user_to_course(
     return course_users
 
 
-@router.patch("/courses/{course_id}/users/{user_id}", gitdependencies=[Depends(allow_create_resource)])
+@router.patch("/courses/{course_id}/users/{user_id}", dependencies=[Depends(allow_create_resource)])
 def update_users_in_course(
         course_id: int,
         user_id: int,
