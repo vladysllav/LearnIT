@@ -36,6 +36,14 @@ class CourseRatingRead(BaseCourseRating):
         orm_mode = True
 
 
+class CourseUserAssociationUpdate(BaseModel):
+    course_id: Optional[int] = Field(None, example=1)
+    user_id: Optional[int] = Field(None, example=1)
+
+    class Config:
+        orm_mode = True
+
+
 class CourseRatingCreate(BaseCourseRating):
     pass
 
