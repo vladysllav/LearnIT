@@ -38,7 +38,7 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
-    def add_user(self, db: Session, course: Course, user: User):
+    def add_user_to_course(self, db: Session, course: Course, user: User):
 
         if user.type is not UserType.student:
             raise HTTPException(status_code=400, detail="You can only add students to the course.")
@@ -51,7 +51,7 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
 
         return course.users
 
-    def remove_user(self, db: Session, course: Course, user: User):
+    def remove_user_from_course(self, db: Session, course: Course, user: User):
 
         if user not in course.users:
             raise HTTPException(status_code=404, detail="User not in the course.")
@@ -69,10 +69,12 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
             user_id: int
     ):
 
-        course = get_course(data.course_id, db=db)
-        user = get_user(data.user_id, db=db)
+        course = get_course(course_id, db=db)
+        user = get_user(user_id, db=db)
+        new_course = get_course(data.course_id, db=db)
+        new_user = get_user(data.user_id, db=db)
 
-        if user.type is not UserType.student:
+        if new_user.type is not UserType.student:
             raise HTTPException(status_code=400, detail="You can only add students to the course.")
 
         update_data = {}
@@ -81,21 +83,15 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
         if data.course_id:
             update_data["course_id"] = data.course_id
 
-        association = db.query(user_course_association).filter(
-            user_course_association.c.user_id == user_id,
-            user_course_association.c.course_id == course_id
-        ).first()
+        association_user = next((assoc for assoc in course.users if assoc.id == user_id), None)
 
-        if not association:
+        if not association_user:
             raise HTTPException(status_code=404, detail="Association not found. "
                                                         "Change your 'course_id' or 'user_id' in the parameters.")
 
-        existing_association = db.query(user_course_association).filter(
-            user_course_association.c.user_id == data.user_id,
-            user_course_association.c.course_id == data.course_id
-        ).first()
+        existing_association_user = next((assoc for assoc in new_course.users if assoc.id == data.user_id), None)
 
-        if existing_association:
+        if existing_association_user:
             raise HTTPException(status_code=400, detail="Association already exists. "
                                                         "Change your 'course_id' or 'user_id' in the dictionary.")
 
@@ -104,14 +100,12 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
             user_course_association.c.course_id == course_id
         ).update(update_data)
 
-        res_association = db.query(user_course_association).filter(
-            user_course_association.c.user_id == data.user_id,
-            user_course_association.c.course_id == data.course_id
-        ).first()
-
         db.commit()
 
-        return {"course_id": res_association[1], "user_id": res_association[0]}
+        res_association_user = next((assoc for assoc in new_course.users if assoc.id == data.user_id), None)
+        res_association_course = next((assoc for assoc in new_user.courses if assoc.id == data.course_id), None)
+
+        return {"course_id": res_association_course.id, "user_id": res_association_user.id}
 
 
 class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):

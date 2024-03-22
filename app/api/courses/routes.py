@@ -5,7 +5,7 @@ from app.dependencies.lessons import get_lessons
 from app.filters import CourseFilter
 from app.models import Lessons
 from app.models.user import User, UserType
-from app.models.course import Course, user_course_association
+from app.models.course import Course
 from app.models.module import Module
 
 from app.crud.crud_course import course as crud_course
@@ -90,11 +90,11 @@ def add_user_to_course(
         user: User = Depends(get_user),
 ):
 
-    course_users = crud_course.add_user(db=db, course=course, user=user)
+    course_users = crud_course.add_user_to_course(db=db, course=course, user=user)
     return course_users
 
 
-@router.patch("/courses/{course_id}/users/{user_id}", dependencies=[Depends(allow_create_resource)])
+@router.patch("/{course_id}/users/{user_id}", dependencies=[Depends(allow_create_resource)])
 def update_users_in_course(
         course_id: int,
         user_id: int,
@@ -116,7 +116,7 @@ def remove_user_from_course(
         user: User = Depends(get_user),
 ):
 
-    course_users = crud_course.remove_user(db=db, course=course, user=user)
+    course_users = crud_course.remove_user_from_course(db=db, course=course, user=user)
     return course_users
 
 
