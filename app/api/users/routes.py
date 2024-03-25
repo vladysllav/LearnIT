@@ -18,11 +18,6 @@ from app.core.config import settings
 router = APIRouter()
 
 
-@router.get("/alive")
-def alive():
-    return {'status': 'ok'}
-
-
 @router.get("/", response_model=List[schemas.User])
 def read_users(
         response: Response,

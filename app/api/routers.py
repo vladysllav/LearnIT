@@ -10,3 +10,8 @@ api_router.include_router(user_routes.router, prefix="/users", tags=["users"])
 api_router.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
 api_router.include_router(course_routes.router, prefix="/courses", tags=["courses"])
 api_router.include_router(s3_routes.router, prefix='/s3')
+
+
+@api_router.get("/alive")
+def alive():
+    return {'status': 'ok'}
