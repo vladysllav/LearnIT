@@ -11,15 +11,19 @@ from app.models.module import Module
 from app.crud.crud_course import course as crud_course
 from app.crud.crud_course import course_rating as crud_course_rating
 from app.crud.crud_module import module as crud_module
-from app.schemas.course import CourseUpdate, CourseCreate, CourseRead, CourseRatingCreate, CourseRatingRead
+from app.schemas.course import (CourseUpdate, CourseCreate, CourseRead, CourseRatingCreate, CourseRatingRead,
+                                CourseUserAssociationUpdate)
 from app.schemas.lessons import LessonsCreate, LessonsUpdate
 from app.schemas.module import ModuleCreate, ModuleUpdate
+from app.schemas.user import User as UserSchema
 
 from app.dependencies.base import get_db
-from app.dependencies.users import get_current_user, PermissionChecker
+from app.dependencies.users import get_user, get_current_user, PermissionChecker
 from app.dependencies.course import get_course, check_course_access, get_module
 
 from app.crud.crud_lessons import lessons as crud_lessons
+
+from typing import List
 
 router = APIRouter()
 allow_create_resource = PermissionChecker([UserType.admin, UserType.superadmin])
@@ -36,7 +40,7 @@ def read_course_by_id(course: Course = Depends(get_course)):
     return course
 
 
-@router.post("/courses/{course_id}/ratings", dependencies=[Depends(allow_add_rating)],
+@router.post("/{course_id}/ratings", dependencies=[Depends(allow_add_rating)],
              response_model=CourseRatingRead)
 def create_course_rating(
     course_id: int,
@@ -67,6 +71,53 @@ def update_course(*, db: Session = Depends(get_db),
                   course_in: CourseUpdate):
     course = crud_course.update(db, db_obj=course, obj_in=course_in)
     return course
+
+
+@router.get("/{course_id}/users/", response_model=List[UserSchema])
+def get_users_of_course(
+        course: Course = Depends(get_course),
+):
+    return course.users
+
+
+@router.post(
+    "/{course_id}/users/{user_id}",
+    response_model=List[UserSchema],
+    dependencies=[Depends(allow_create_resource)])
+def add_user_to_course(
+        db: Session = Depends(get_db),
+        course: Course = Depends(get_course),
+        user: User = Depends(get_user),
+):
+
+    course_users = crud_course.add_user_to_course(db=db, course=course, user=user)
+    return course_users
+
+
+@router.patch("/{course_id}/users/{user_id}", dependencies=[Depends(allow_create_resource)])
+def update_users_in_course(
+        course_id: int,
+        user_id: int,
+        data: CourseUserAssociationUpdate,
+        db: Session = Depends(get_db),
+):
+
+    association = crud_course.update_users(db=db, data=data, course_id=course_id, user_id=user_id)
+    return association
+
+
+@router.delete(
+    "/{course_id}/users/{user_id}",
+    response_model=List[UserSchema],
+    dependencies=[Depends(allow_create_resource)])
+def remove_user_from_course(
+        db: Session = Depends(get_db),
+        course: Course = Depends(get_course),
+        user: User = Depends(get_user),
+):
+
+    course_users = crud_course.remove_user_from_course(db=db, course=course, user=user)
+    return course_users
 
 
 @router.get('/{course_id}/modules/{module_id}', )

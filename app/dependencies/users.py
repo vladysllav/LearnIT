@@ -24,6 +24,14 @@ from app.dependencies.base import get_db
 jwt_bearer = JWTBearer()
 
 
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
+
+
 def get_current_user(
         db: Session = Depends(get_db), token: str = Depends(jwt_bearer)
 ) -> models.User:

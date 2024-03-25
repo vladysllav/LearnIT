@@ -4,11 +4,13 @@ from datetime import datetime
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.schemas.course import CourseCreate, CourseUpdate, CourseRatingCreate
-from app.models.course import Course, CourseRating
+from app.dependencies.users import get_user
+from app.dependencies.course import get_course
+from app.schemas.course import CourseCreate, CourseUpdate, CourseRatingCreate, CourseUserAssociationUpdate
+from app.models.course import Course, CourseRating, user_course_association
 from app.crud.base import CRUDBase
 from app.crud.crud_user import user
-from app.models.user import User
+from app.models.user import User, UserType
 
 
 class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
@@ -35,6 +37,75 @@ class CRUDCourse(CRUDBase[Course, CourseCreate, CourseUpdate]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
+
+    def add_user_to_course(self, db: Session, course: Course, user: User):
+
+        if user.type is not UserType.student:
+            raise HTTPException(status_code=400, detail="You can only add students to the course.")
+
+        if user in course.users:
+            raise HTTPException(status_code=400, detail="User already in the course.")
+
+        course.users.append(user)
+        db.commit()
+
+        return course.users
+
+    def remove_user_from_course(self, db: Session, course: Course, user: User):
+
+        if user not in course.users:
+            raise HTTPException(status_code=404, detail="User not in the course.")
+
+        course.users.remove(user)
+        db.commit()
+
+        return course.users
+
+    def update_users(
+            self,
+            db: Session,
+            data: CourseUserAssociationUpdate,
+            course_id: int,
+            user_id: int
+    ):
+
+        course = get_course(course_id, db=db)
+        user = get_user(user_id, db=db)
+        new_course = get_course(data.course_id, db=db)
+        new_user = get_user(data.user_id, db=db)
+
+        if new_user.type is not UserType.student:
+            raise HTTPException(status_code=400, detail="You can only add students to the course.")
+
+        update_data = {}
+        if data.user_id:
+            update_data["user_id"] = data.user_id
+        if data.course_id:
+            update_data["course_id"] = data.course_id
+
+        association_user = next((assoc for assoc in course.users if assoc.id == user_id), None)
+
+        if not association_user:
+            raise HTTPException(status_code=404, detail="Association not found. "
+                                                        "Change your 'course_id' or 'user_id' in the parameters.")
+
+        existing_association_user = next((assoc for assoc in new_course.users if assoc.id == data.user_id), None)
+
+        if existing_association_user:
+            raise HTTPException(status_code=400, detail="Association already exists. "
+                                                        "Change your 'course_id' or 'user_id' in the dictionary.")
+
+        db.query(user_course_association).filter(
+            user_course_association.c.user_id == user_id,
+            user_course_association.c.course_id == course_id
+        ).update(update_data)
+
+        db.commit()
+
+        res_association_user = next((assoc for assoc in new_course.users if assoc.id == data.user_id), None)
+        res_association_course = next((assoc for assoc in new_user.courses if assoc.id == data.course_id), None)
+
+        return {"course_id": res_association_course.id, "user_id": res_association_user.id}
 
 
 class CRUDCourseRating(CRUDBase[CourseRating, CourseRatingCreate, None]):
