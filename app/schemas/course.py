@@ -9,6 +9,7 @@ class BaseCourse(BaseModel):
     name: Optional[str] = Field(None, example='ULTIMATE Python course')
     description: Optional[str] = Field(None, example='The best Python course in the World!')
     is_active: Optional[bool] = Field(True, example=True)
+    course_image: Optional[str] = Field(None)
 
 
 class BaseCourseRating(BaseModel):
