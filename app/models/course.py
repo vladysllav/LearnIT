@@ -17,6 +17,7 @@ class Course(Base, TimestampedModel):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
+    course_image = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_by_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     created_by = relationship("User", back_populates='created_courses')
